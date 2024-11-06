@@ -1,0 +1,9 @@
+[submodule "ext/src/eigen"]
+	path = ext/src/eigen
+	url = https://gitlab.com/libeigen/eigen.git
+[submodule "ext/src/opencv"]
+	path = ext/src/opencv
+	url = https://github.com/opencv/opencv.git
+[submodule "ext/src/sdl2"]
+	path = ext/src/sdl2
+	url = https://github.com/libsdl-org/SDL.git
