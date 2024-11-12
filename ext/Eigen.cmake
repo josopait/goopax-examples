@@ -1,0 +1,5 @@
+set(BUILD_SHARED_LIBS_save BUILD_SHARED_LIBS)
+set(BUILD_SHARED_LIBS 0)
+add_subdirectory(src/eigen eigen)
+set(BUILD_SHARED_LIBS BUILD_SHARED_LIBS_save)
+unset(BUILD_SHARED_LIBS_save)
