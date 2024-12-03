@@ -11,7 +11,6 @@ std::unique_ptr<sdl_window> create_sdl_window_metal(const char* name, Eigen::Vec
 
 struct sdl_window_metal : sdl_window
 {
-    SDL_Renderer* renderer = nullptr;
     const CAMetalLayer* swapchain = nullptr;
     id<MTLCommandQueue> queue;
 
