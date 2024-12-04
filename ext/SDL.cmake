@@ -1,8 +1,3 @@
-FetchContent_Declare(
-    sdl3
-    GIT_REPOSITORY  https://github.com/libsdl-org/SDL.git
-)
-FetchContent_MakeAvailable(sdl3)
 set(BUILD_SHARED_LIBS_save BUILD_SHARED_LIBS)
 set(BUILD_SHARED_LIBS 0)
 set(SDL_SHARED_save SDL_SHARED)
@@ -25,6 +20,12 @@ set(SDL_GPU_save SDL_GPU)
 set(SDL_GPU 0)
 set(SDL_STATIC_PIC_save SDL_STATIC_PIC)
 set(SDL_STATIC_PIC ON)
+FetchContent_Declare(
+    sdl3
+    GIT_REPOSITORY  https://github.com/libsdl-org/SDL.git
+    GIT_TAG main
+)
+FetchContent_MakeAvailable(sdl3)
 add_subdirectory(sdl3 sdl3)
 set(SDL_STATIC_PIC SDL_STATIC_PIC_save)
 unset(SDL_STATIC_PIC_save)
