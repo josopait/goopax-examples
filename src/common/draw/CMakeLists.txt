@@ -2,6 +2,8 @@ option(GOOPAXLIB_DEBUG "GOOPAXLIB_DEBUG" OFF)
 
 if (APPLE)
   add_library(goopax_draw window_sdl.cpp window.cpp window_sdl.h window.h window_metal.h window_metal.mm)
+elseif (WIN32)
+  add_library(goopax_draw STATIC window_sdl.cpp window.cpp window_sdl.h window.h)
 else()
   add_library(goopax_draw window_sdl.cpp window.cpp window_sdl.h window.h)
 endif()

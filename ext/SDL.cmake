@@ -26,7 +26,6 @@ FetchContent_Declare(
     GIT_TAG main
 )
 FetchContent_MakeAvailable(sdl3)
-add_subdirectory(sdl3 sdl3)
 set(SDL_STATIC_PIC SDL_STATIC_PIC_save)
 unset(SDL_STATIC_PIC_save)
 set(SDL_GPU SDL_GPU_save)
