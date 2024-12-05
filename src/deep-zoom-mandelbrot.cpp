@@ -133,7 +133,7 @@ public:
 
         auto now = steady_clock::now();
 
-        Vector<Tuint, 2> fbsize = window->get_size();
+        array<Tuint, 2> fbsize = window->get_size();
 
         ++framecount;
         if (now - frametime > std::chrono::seconds(1))
@@ -281,7 +281,7 @@ public:
                                       ++iter;
                                   }
 
-                                  Vector<gpu_float, 4> color = { 0, 0, 0.4, 0 };
+                                  Vector<gpu_float, 4> color = { 0, 0, 0.4, 1 };
 
                                   gpu_if(norm(z) >= 4.f)
                                   {
@@ -329,7 +329,7 @@ int main(int argc, char** argv)
     {
         while (auto e = window->get_event())
         {
-            Vector<unsigned int, 2> window_size = window->get_size().cast<unsigned int>();
+            array<unsigned int, 2> window_size = window->get_size();
             if (e->type == SDL_EVENT_QUIT)
             {
                 quit = true;
@@ -416,15 +416,14 @@ int main(int argc, char** argv)
 
             else if (e->type == SDL_EVENT_KEY_DOWN)
             {
-                cout << "keydown. sym=" << e->key.keysym.sym << ", name=" << SDL_GetKeyName(e->key.keysym.sym) << endl;
-                switch (e->key.keysym.sym)
+                switch (e->key.key)
                 {
                     case SDLK_ESCAPE:
                         quit = true;
                         break;
-                    case SDLK_f: {
+                    case SDLK_F: {
                         int err = SDL_SetWindowFullscreen(window->window,
-                                                          (is_fullscreen ? 0 : SDL_WINDOW_FULLSCREEN_DESKTOP));
+                                                          !is_fullscreen);
                         if (err == 0)
                         {
                             is_fullscreen = !is_fullscreen;
