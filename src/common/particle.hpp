@@ -1,12 +1,6 @@
 #pragma once
 
-#ifdef __APPLE__
-#define USE_METAL 1
-#else
-#define USE_METAL 0
-#endif
-
-#if USE_METAL
+#if WITH_METAL
 #include "draw/window_metal.h"
 #else
 #include "draw/window_gl.h"
@@ -21,7 +15,7 @@
 #include <goopax_gl>
 #endif
 
-#if USE_METAL
+#if WITH_METAL
 
 struct particle_renderer
 {

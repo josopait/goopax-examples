@@ -8,7 +8,7 @@ std::unique_ptr<sdl_window> sdl_window::create_sdl_window_metal(const char* name
 
 
 void sdl_window_metal::draw_goopax_impl(
-    std::function<void(goopax::image_buffer<2, Eigen::Vector<uint8_t, 4>, true>& image)> func)
+    std::function<void(goopax::image_buffer<2, Eigen::Vector<Tuint8_t, 4>, true>& image)> func)
 {
     @autoreleasepool
     {

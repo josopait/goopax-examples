@@ -6,24 +6,10 @@ find_package(OpenGL)
 
 if (TARGET SDL3::SDL3)
 
-if (APPLE)
-    add_library(goopax_draw window_sdl.cpp window.cpp window_sdl.h window.h window_metal.h window_metal.mm)
-else()
-    add_library(goopax_draw window_sdl.cpp window.cpp window_sdl.h window.h)
-endif()
-
 if (TARGET OpenGL::GL)
-    target_link_libraries(goopax_draw PRIVATE OpenGL::GL)
     option(GOOPAX_DRAW_WITH_OPENGL "with OpenGL support" 1)
 else()
     option(GOOPAX_DRAW_WITH_OPENGL "with OpenGL support" 0)
-endif()
-message("OpenGL: ${GOOPAX_DRAW_WITH_OPENGL}")
-
-if (GOOPAX_DRAW_WITH_OPENGL)
-    target_compile_definitions(goopax_draw PRIVATE -DWITH_OPENGL=1)
-else()
-    target_compile_definitions(goopax_draw PRIVATE -DWITH_OPENGL=0)
 endif()
 
 if (APPLE)
@@ -31,12 +17,39 @@ if (APPLE)
 else()
     option(GOOPAX_DRAW_WITH_METAL "with Metal support" 0)
 endif()
+
+if  (GOOPAXLIB_DEBUG)
+set(GOOPAX_DRAW_WITH_METAL 0)
+set(GOOPAX_DRAW_WITH_OPENGL 0)
+endif()
+
+message("OpenGL: ${GOOPAX_DRAW_WITH_OPENGL}")
 message("Metal: ${GOOPAX_DRAW_WITH_METAL}")
 
+
+set (FILES window_sdl.cpp window.cpp window_sdl.h window.h window_plain.h window_plain.cpp)
 if (GOOPAX_DRAW_WITH_METAL)
-    target_compile_definitions(goopax_draw PRIVATE -DWITH_METAL=1)
+    set (FILES ${FILES} window_metal.h window_metal.mm)
+endif()
+if (GOOPAX_DRAW_WITH_OPENGL)
+    set(FILES ${FILES} window_gl.h window_gl.cpp)
+endif()
+
+add_library(goopax_draw ${FILES})
+
+
+
+if (GOOPAX_DRAW_WITH_OPENGL)
+    target_compile_definitions(goopax_draw PUBLIC -DWITH_OPENGL=1)
+    target_link_libraries(goopax_draw PRIVATE OpenGL::GL)
 else()
-    target_compile_definitions(goopax_draw PRIVATE -DWITH_METAL=0)
+    target_compile_definitions(goopax_draw PUBLIC -DWITH_OPENGL=0)
+endif()
+
+if (GOOPAX_DRAW_WITH_METAL)
+    target_compile_definitions(goopax_draw PUBLIC -DWITH_METAL=1)
+else()
+    target_compile_definitions(goopax_draw PUBLIC -DWITH_METAL=0)
 endif()
 
 #target_include_directories(goopax_draw SYSTEM PRIVATE "ext/glatter/include")
