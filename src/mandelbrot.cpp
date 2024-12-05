@@ -184,7 +184,7 @@ int main(int, char**)
                         quit = true;
                         break;
                     case SDLK_F: {
-                        int err = SDL_SetWindowFullscreen(window->window, (is_fullscreen ? false : true));
+                        int err = SDL_SetWindowFullscreen(window->window, !is_fullscreen);
                         if (err == 0)
                         {
                             is_fullscreen = !is_fullscreen;
