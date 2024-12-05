@@ -59,7 +59,7 @@ int main(int argc, char** argv)
         sdl_window::create("nbody", { 1024, 768 }, SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY);
     goopax_device device = window->device;
 
-#if USE_METAL
+#if WITH_METAL
     particle_renderer Renderer(dynamic_cast<sdl_window_metal&>(*window));
     buffer<Vector3<float>> x(device, N);  // OpenGL buffer
     buffer<Vector3<float>> x2(device, N); // OpenGL buffer
@@ -145,7 +145,7 @@ int main(int argc, char** argv)
             frametime = now;
         }
 
-#if USE_METAL
+#if WITH_METAL
         Renderer.render(x);
 #else
         render(window->window, x);

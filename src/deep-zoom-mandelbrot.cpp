@@ -133,7 +133,7 @@ public:
 
         auto now = steady_clock::now();
 
-        array<Tuint, 2> fbsize = window->get_size();
+        array<unsigned int, 2> fbsize = window->get_size();
 
         ++framecount;
         if (now - frametime > std::chrono::seconds(1))
@@ -141,7 +141,8 @@ public:
             stringstream title;
             auto rate = framecount / duration<double>(now - frametime).count();
             title << "Mandelbrot: screen size=" << fbsize[0] << "x" << fbsize[1] << ", " << rate
-                  << " fps, scale=" << scale << ", max_iter=" << MAX_ITER;
+                  << " fps, scale=" << scale << ", max_iter=" << MAX_ITER
+            << ", device=" << window->device.name();
 
             window->set_title(title.str());
             framecount = 0;

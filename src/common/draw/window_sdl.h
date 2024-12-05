@@ -2,6 +2,8 @@
 
 #include "window.h"
 
+void print_properties(unsigned int props);
+
 struct sdl_window
 {
     SDL_Window* window = nullptr;
@@ -18,7 +20,7 @@ public:
 
 private:
     virtual void draw_goopax_impl(
-        std::function<void(goopax::image_buffer<2, Eigen::Vector<uint8_t, 4>, true>& image)> func) =  0;
+        std::function<void(goopax::image_buffer<2, Eigen::Vector<Tuint8_t, 4>, true>& image)> func) =  0;
     
     public:
     void draw_goopax(std::function<void(goopax::image_buffer<2, Eigen::Vector<Tuint8_t, 4>, true>& image)> func);
@@ -36,17 +38,3 @@ public:
     sdl_window& operator=(const sdl_window&) = delete;
 };
 
-
-#if WITH_OPENGL
-class sdl_window_gl :
-public sdl_window
-{
-    goopax::image_buffer<2, Eigen::Vector<uint8_t, 4>, true> image;
-    
-    void draw_goopax_impl(
-        std::function<void(goopax::image_buffer<2, Eigen::Vector<uint8_t, 4>, true>& image)> func) final override;
-
-public:
-    sdl_window_gl(const char* name, Eigen::Vector<Tuint, 2> size, uint32_t flags = 0);
-};
-#endif
