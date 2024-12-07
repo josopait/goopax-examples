@@ -21,7 +21,7 @@ void sdl_window_plain::draw_goopax_impl(std::function<void(image_buffer<2, Eigen
     }
     std::array<unsigned int, 2> size = {(unsigned int)surface->w, (unsigned int)surface->h};
     {
-#if GOOPAXLIB_DEBUG
+#if GOOPAX_DEBUG
         image_buffer<2, Eigen::Vector<Tuint8_t, 4>, true> image(device, size);
         func(image);
         vector<Tuint> data(size[0]*size[1]);
@@ -51,7 +51,7 @@ void sdl_window_plain::draw_goopax_impl(std::function<void(image_buffer<2, Eigen
 sdl_window_plain::sdl_window_plain(const char* name, Eigen::Vector<Tuint, 2> size, uint32_t flags) :
 sdl_window(name, size, flags, nullptr)
 {
-#if  GOOPAXLIB_DEBUG
+#if  GOOPAX_DEBUG
     this->device = goopax::default_device(env_CPU);
 #else
     this->device = goopax::default_device(env_ALL);

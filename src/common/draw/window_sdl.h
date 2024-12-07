@@ -1,6 +1,8 @@
 #pragma once
 
-#include "window.h"
+#include "types.h"
+#include <SDL3/SDL.h>
+#include <optional>
 
 void print_properties(unsigned int props);
 

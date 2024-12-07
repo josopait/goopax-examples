@@ -1,4 +1,4 @@
-option(GOOPAXLIB_DEBUG "GOOPAXLIB_DEBUG" OFF)
+option(GOOPAX_DEBUG "GOOPAX_DEBUG" OFF)
 
 
 find_package(SDL3)
@@ -18,7 +18,7 @@ else()
     option(GOOPAX_DRAW_WITH_METAL "with Metal support" 0)
 endif()
 
-if  (GOOPAXLIB_DEBUG)
+if  (GOOPAX_DEBUG)
 set(GOOPAX_DRAW_WITH_METAL 0)
 set(GOOPAX_DRAW_WITH_OPENGL 0)
 endif()
@@ -27,7 +27,7 @@ message("OpenGL: ${GOOPAX_DRAW_WITH_OPENGL}")
 message("Metal: ${GOOPAX_DRAW_WITH_METAL}")
 
 
-set (FILES window_sdl.cpp window.cpp window_sdl.h window.h window_plain.h window_plain.cpp)
+set (FILES window_sdl.cpp window_sdl.h window_plain.h window_plain.cpp)
 if (GOOPAX_DRAW_WITH_METAL)
     set (FILES ${FILES} window_metal.h window_metal.mm)
 endif()
@@ -62,10 +62,10 @@ if (NOT APPLE)
 endif()
 target_link_libraries(goopax_draw PUBLIC goopax::goopax Eigen3::Eigen)
 
-if (GOOPAXLIB_DEBUG)
-  target_compile_definitions(goopax_draw PUBLIC -DGOOPAXLIB_DEBUG=1)
+if (GOOPAX_DEBUG)
+  target_compile_definitions(goopax_draw PUBLIC -DGOOPAX_DEBUG=1)
 else()
-  target_compile_definitions(goopax_draw PUBLIC -DGOOPAXLIB_DEBUG=0)
+  target_compile_definitions(goopax_draw PUBLIC -DGOOPAX_DEBUG=0)
 endif()
 
 endif()
