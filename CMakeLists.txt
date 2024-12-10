@@ -3,6 +3,8 @@
 #invoking with --install-prefix requires 3.21
 if (WIN32)
 cmake_minimum_required (VERSION 3.14)
+include(ExternalProject)
+include(ext/Eigen.cmake)
 include(FetchContent)
 set(CMAKE_POSITION_INDEPENDENT_CODE_save CMAKE_POSITION_INDEPENDENT_CODE)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
