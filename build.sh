@@ -3,7 +3,8 @@
 set -e
 
 export goopax_DIR="$PWD/.."
-export Eigen3_DIR=ext/dist/eigen
+export Eigen3_DIR=dist/eigen
+export SDL3_DIR=dist/sdl3
 export OpenCV_DIR=ext/dist/opencv
 
 export goopax_DIR="$PWD/.."
@@ -14,7 +15,7 @@ else
     export CMAKE_PREFIX_PATH="$PWD/ext/dist/gmp"
 fi
 
-cmake $CMAKE_FLAGS -B build src
+cmake $CMAKE_FLAGS -B build src --install-prefix "$PWD/dist"
 
 cmake --build build
 

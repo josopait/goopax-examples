@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.21)
 
 project(goopax_examples LANGUAGES CXX)
 
@@ -29,9 +29,9 @@ find_package(Threads)
 find_package(OpenCL)
 find_package(Boost 1.65.0 COMPONENTS system)
 find_package(SDL3)
-#if (NOT TARGET SDL3::SDL3)
-#  include(SDL.cmake)
-#endif ()
+if (NOT TARGET SDL3::SDL3)
+  include(SDL.cmake)
+endif ()
 find_package(Eigen3 3.3 NO_MODULE)
 if (NOT TARGET Eigen3::Eigen)
   include(Eigen.cmake)
