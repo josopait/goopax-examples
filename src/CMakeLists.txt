@@ -50,7 +50,7 @@ if (WITH_CUDA)
   set (CMAKE_CUDA_STANDARD 17)
 endif()
 
-  add_subdirectory(common/draw)
+add_subdirectory(common/draw)
 
 
 macro(add_withfile P FN)
@@ -88,10 +88,16 @@ macro(add P)
   add_withfile(${P} ${P}.cpp ${T})
 endmacro()
 
-add(nbody goopax_draw)
-if (TARGET nbody)
-  target_include_directories(nbody SYSTEM PRIVATE "common/draw/ext/glatter/include")
+if (GOOPAX_DRAW_WITH_OPENGL OR GOOPAX_DRAW_WITH_METAL AND NOT GOOPAX_DEBUG)
+  add(nbody goopax_draw)
+  if (TARGET nbody)
+    target_include_directories(nbody SYSTEM PRIVATE "common/draw/ext/glatter/include")
+  endif()
+  if (APPLE)
+    SET_SOURCE_FILES_PROPERTIES( nbody.cpp PROPERTIES LANGUAGE OBJCXX )
+  endif()
 endif()
+
 
 add(deep-zoom-mandelbrot gmp Boost::system goopax_draw)
 add(gather)
@@ -106,10 +112,6 @@ add(helloworld)
 add(matmul Eigen3::Eigen)
 add(cl-interop-1 OpenCL::OpenCL)
 add(cl-interop-2 OpenCL::OpenCL)
-
-if (APPLE)
-  SET_SOURCE_FILES_PROPERTIES( nbody.cpp PROPERTIES LANGUAGE OBJCXX )
-endif()
 
 if (IOS AND TARGET fft)
   SET_TARGET_PROPERTIES(fft PROPERTIES MACOSX_BUNDLE_INFO_PLIST "${PROJECT_SOURCE_DIR}/ios/fft.plist")

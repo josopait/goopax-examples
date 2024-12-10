@@ -51,7 +51,7 @@ std::array<unsigned int, 2> sdl_window::get_size() const
     int width;
     int height;
     SDL_GetWindowSize(window, &width, &height);
-    return {(unsigned  int) width, (unsigned int)height };
+    return { (unsigned int)width, (unsigned int)height };
 }
 
 std::optional<SDL_Event> sdl_window::get_event()
@@ -90,7 +90,6 @@ void sdl_window::draw_goopax(std::function<void(image_buffer<2, Vector<Tuint8_t,
     draw_goopax_impl(func);
 }
 
-
 std::unique_ptr<sdl_window> sdl_window::create(const char* name, Eigen::Vector<Tuint, 2> size, uint32_t flags)
 {
 #if WITH_METAL
@@ -99,7 +98,7 @@ std::unique_ptr<sdl_window> sdl_window::create(const char* name, Eigen::Vector<T
         cout << "Trying metal." << endl;
         return create_sdl_window_metal(name, size, flags);
     }
-    catch(std::exception& e)
+    catch (std::exception& e)
     {
         cout << "Got exception '" << e.what() << "'" << endl;
     }
@@ -110,7 +109,7 @@ std::unique_ptr<sdl_window> sdl_window::create(const char* name, Eigen::Vector<T
         cout << "Trying opengl." << endl;
         return std::make_unique<sdl_window_gl>(name, size, flags);
     }
-    catch(std::exception& e)
+    catch (std::exception& e)
     {
         cout << "Got exception '" << e.what() << "'" << endl;
     }
@@ -120,7 +119,7 @@ std::unique_ptr<sdl_window> sdl_window::create(const char* name, Eigen::Vector<T
         cout << "Trying plain." << endl;
         return std::make_unique<sdl_window_plain>(name, size, flags);
     }
-    catch(std::exception& e)
+    catch (std::exception& e)
     {
         cout << "Got exception '" << e.what() << "'" << endl;
     }
@@ -140,7 +139,6 @@ sdl_window::sdl_window(const char* name, Vector<Tuint, 2> size, uint32_t flags, 
 
     std::atexit([]() { SDL_Quit(); });
 
-    
     window = SDL_CreateWindow(name,    // window title
                               size[0], // width, in pixels
                               size[1], // height, in pixels
@@ -151,26 +149,26 @@ sdl_window::sdl_window(const char* name, Vector<Tuint, 2> size, uint32_t flags, 
         throw std::runtime_error(std::string("Cannot create window: ") + SDL_GetError());
     }
 
-    if  (renderer_name != nullptr)
+    if (renderer_name != nullptr)
     {
         SDL_PropertiesID props = SDL_CreateProperties();
-        
+
         bool ok = true;
         ok = ok && SDL_SetStringProperty(props, SDL_PROP_RENDERER_CREATE_NAME_STRING, renderer_name);
         ok = ok && SDL_SetPointerProperty(props, SDL_PROP_RENDERER_CREATE_WINDOW_POINTER, window);
         assert(ok);
-        
+
         renderer = SDL_CreateRendererWithProperties(props);
-        
+
         SDL_DestroyProperties(props);
-        
+
         if (renderer == nullptr)
         {
             SDL_DestroyWindow(window);
             window = nullptr;
             throw std::runtime_error(std::string("Cannot create renderer: ") + SDL_GetError());
         }
-        
+
         cout << "renderer properties:" << endl;
         print_properties(SDL_GetRendererProperties(renderer));
     }
@@ -194,4 +192,3 @@ sdl_window::~sdl_window()
         window = nullptr;
     }
 }
-

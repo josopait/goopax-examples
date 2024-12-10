@@ -141,8 +141,7 @@ public:
             stringstream title;
             auto rate = framecount / duration<double>(now - frametime).count();
             title << "Mandelbrot: screen size=" << fbsize[0] << "x" << fbsize[1] << ", " << rate
-                  << " fps, scale=" << scale << ", max_iter=" << MAX_ITER
-            << ", device=" << window->device.name();
+                  << " fps, scale=" << scale << ", max_iter=" << MAX_ITER << ", device=" << window->device.name();
 
             window->set_title(title.str());
             framecount = 0;
@@ -423,8 +422,7 @@ int main(int argc, char** argv)
                         quit = true;
                         break;
                     case SDLK_F: {
-                        int err = SDL_SetWindowFullscreen(window->window,
-                                                          !is_fullscreen);
+                        int err = SDL_SetWindowFullscreen(window->window, !is_fullscreen);
                         if (err == 0)
                         {
                             is_fullscreen = !is_fullscreen;

@@ -2,11 +2,10 @@
 
 #include "window_sdl.h"
 
-class sdl_window_plain :
-public sdl_window
+class sdl_window_plain : public sdl_window
 {
     goopax::image_buffer<2, Eigen::Vector<Tuint8_t, 4>, true> image;
-    
+
     void draw_goopax_impl(
         std::function<void(goopax::image_buffer<2, Eigen::Vector<Tuint8_t, 4>, true>& image)> func) final override;
 

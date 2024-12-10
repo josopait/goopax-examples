@@ -1,11 +1,11 @@
 #include "window_metal.h"
 using namespace std;
 
-std::unique_ptr<sdl_window> sdl_window::create_sdl_window_metal(const char* name, Eigen::Vector<Tuint, 2> size, uint32_t flags)
+std::unique_ptr<sdl_window>
+sdl_window::create_sdl_window_metal(const char* name, Eigen::Vector<Tuint, 2> size, uint32_t flags)
 {
     return std::make_unique<sdl_window_metal>(name, size, flags);
 }
-
 
 void sdl_window_metal::draw_goopax_impl(
     std::function<void(goopax::image_buffer<2, Eigen::Vector<Tuint8_t, 4>, true>& image)> func)
@@ -52,15 +52,14 @@ sdl_window_metal::sdl_window_metal(const char* name, Eigen::Vector<Tuint, 2> siz
         cleanup();
         throw;
     }
-    
+
     {
         const auto* mtldevice = swapchain.device;
         cout << "mtldevice=" << mtldevice << endl;
         for (auto& device : goopax::devices(goopax::env_METAL))
         {
-            cout << "have device: " << device.name()
-            << ", ptr=" << device.get_device_ptr() << flush;
-            if  (device.get_device_ptr() == mtldevice)
+            cout << "have device: " << device.name() << ", ptr=" << device.get_device_ptr() << flush;
+            if (device.get_device_ptr() == mtldevice)
             {
                 cout << ". Using." << flush;
                 this->device = device;

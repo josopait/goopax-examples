@@ -2,10 +2,10 @@
 
 #if WITH_METAL
 
+#include "window_sdl.h"
 #import <Metal/Metal.h>
 #import <QuartzCore/CAMetalLayer.h>
 #include <goopax>
-#include "window_sdl.h"
 
 std::unique_ptr<sdl_window> create_sdl_window_metal(const char* name, Eigen::Vector<Tuint, 2> size, uint32_t flags);
 

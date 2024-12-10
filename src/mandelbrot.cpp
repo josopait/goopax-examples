@@ -218,9 +218,8 @@ int main(int, char**)
         {
             stringstream title;
             auto rate = framecount / std::chrono::duration<double>(now - last_fps_time).count();
-            title << "Mandelbrot: screen size=" << render_size[0] << "x" << render_size[1] << ", " << rate
-                  << " fps"
-            << ", device=" << window->device.name();
+            title << "Mandelbrot: screen size=" << render_size[0] << "x" << render_size[1] << ", " << rate << " fps"
+                  << ", device=" << window->device.name();
             window->set_title(title.str());
             framecount = 0;
             last_fps_time = now;
