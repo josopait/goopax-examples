@@ -110,8 +110,7 @@ int main(int argc, char** argv)
                         quit = true;
                         break;
                     case SDLK_F: {
-                        int err = SDL_SetWindowFullscreen(window->window, (is_fullscreen ? false : true));
-                        if (err == 0)
+                        if (SDL_SetWindowFullscreen(window->window, !is_fullscreen))
                         {
                             is_fullscreen = !is_fullscreen;
                         }

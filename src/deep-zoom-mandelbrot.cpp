@@ -307,7 +307,7 @@ public:
     }
 };
 
-int main(int argc, char** argv)
+int main()
 {
     shared_ptr<sdl_window> window = sdl_window::create("deep zoom mandelbrot",
                                                        Eigen::Vector<Tuint, 2>{ 640, 480 },
@@ -422,8 +422,7 @@ int main(int argc, char** argv)
                         quit = true;
                         break;
                     case SDLK_F: {
-                        int err = SDL_SetWindowFullscreen(window->window, !is_fullscreen);
-                        if (err == 0)
+                        if (SDL_SetWindowFullscreen(window->window, !is_fullscreen))
                         {
                             is_fullscreen = !is_fullscreen;
                         }
