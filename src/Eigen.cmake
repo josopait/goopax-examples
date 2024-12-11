@@ -1,10 +1,6 @@
-set(BUILD_SHARED_LIBS_save BUILD_SHARED_LIBS)
-set(BUILD_SHARED_LIBS 0)
 ExternalProject_Add(
     eigen
     GIT_REPOSITORY https://gitlab.com/libeigen/eigen.git
     GIT_TAG 3.4.0
-    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}/eigen
+    CMAKE_ARGS "-DBUILD_SHARED_LIBS=0" "--install-prefix ${CMAKE_INSTALL_PREFIX}/eigen"
 )
-set(BUILD_SHARED_LIBS BUILD_SHARED_LIBS_save)
-unset(BUILD_SHARED_LIBS_save)
