@@ -60,6 +60,17 @@ if (NOT "${gmp_LIBRARY}" STREQUAL "gmp_LIBRARY-NOTFOUND" AND
   target_link_libraries(gmp INTERFACE ${gmp_LIBRARY})
   target_include_directories(gmp SYSTEM INTERFACE ${gmp_INCLUDE})
 endif()
+if (NOT TARGET gmp)
+  include(GMP.cmake)
+  find_library(gmp_LIBRARY NAMES libgmp.a gmp)
+  find_path(gmp_INCLUDE NAMES gmp.h)
+  if (NOT "${gmp_LIBRARY}" STREQUAL "gmp_LIBRARY-NOTFOUND" AND
+      NOT "${gmp_INCLUDE}" STREQUAL "gmp_INCLUDE-NOTFOUND")
+    add_library(gmp INTERFACE)
+    target_link_libraries(gmp INTERFACE ${gmp_LIBRARY})
+    target_include_directories(gmp SYSTEM INTERFACE ${gmp_INCLUDE})
+  endif()
+endif()
 
 if (WITH_CUDA)
   find_package(CUDA)
