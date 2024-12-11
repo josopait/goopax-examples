@@ -5,13 +5,13 @@ set -e
 export goopax_DIR="$PWD/.."
 export Eigen3_DIR=dist/eigen
 export SDL3_DIR=dist/sdl3
-export OpenCV_DIR=ext/dist/opencv
+export OpenCV_DIR=dist/opencv
 
 export goopax_DIR="$PWD/.."
 if  [ "$(uname -o)" == "Msys" ]; then
     CMAKE_FLAGS="$CMAKE_FLAGS -DCMAKE_CONFIGURATION_TYPES=Debug -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDebug -DOpenCV_STATIC=ON"
 else
-    export Boost_DIR=ext/dist/boost
+    export Boost_DIR=dist/boost
     export CMAKE_PREFIX_PATH="$PWD/ext/dist/gmp"
 fi
 
