@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.21)
 
 project(goopax_examples LANGUAGES CXX)
 
@@ -22,17 +22,35 @@ if (ANDROID OR IOS)
   set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE BOTH)
 endif()
 
+include(ExternalProject)
+
 find_package(goopax REQUIRED)
 find_package(Threads)
 find_package(OpenCL)
-find_package(Boost 1.65.0 COMPONENTS system)
-find_package(Eigen3 3.3 NO_MODULE)
 
+find_package(Eigen3 3.3 NO_MODULE)
+if (NOT TARGET Eigen3::Eigen)
+  include(Eigen.cmake)
+endif ()
 find_package(OpenCV)
+if (NOT TARGET opencv AND NOT OpenCV_FOUND AND TARGET Eigen3::Eigen)
+  include(OpenCV.cmake)
+  find_package(OpenCV)
+endif()
 if (OpenCV_FOUND)
   add_library(opencv INTERFACE)
   target_link_libraries(opencv INTERFACE ${OpenCV_LIBS})
   target_include_directories(opencv SYSTEM INTERFACE ${OpenCV_INCLUDE_DIRS})
+endif()
+
+find_package(SDL3)
+if (NOT TARGET SDL3::SDL3)
+  include(SDL.cmake)
+endif ()
+
+find_package(Boost 1.65.0 COMPONENTS system)
+if (NOT TARGET Boost::system)
+  include(Boost.cmake)
 endif()
 
 find_library(gmp_LIBRARY NAMES libgmp.a gmp)
@@ -42,6 +60,17 @@ if (NOT "${gmp_LIBRARY}" STREQUAL "gmp_LIBRARY-NOTFOUND" AND
   add_library(gmp INTERFACE)
   target_link_libraries(gmp INTERFACE ${gmp_LIBRARY})
   target_include_directories(gmp SYSTEM INTERFACE ${gmp_INCLUDE})
+endif()
+if (NOT TARGET gmp)
+  include(GMP.cmake)
+  find_library(gmp_LIBRARY NAMES libgmp.a gmp)
+  find_path(gmp_INCLUDE NAMES gmp.h)
+  if (NOT "${gmp_LIBRARY}" STREQUAL "gmp_LIBRARY-NOTFOUND" AND
+      NOT "${gmp_INCLUDE}" STREQUAL "gmp_INCLUDE-NOTFOUND")
+    add_library(gmp INTERFACE)
+    target_link_libraries(gmp INTERFACE ${gmp_LIBRARY})
+    target_include_directories(gmp SYSTEM INTERFACE ${gmp_INCLUDE})
+  endif()
 endif()
 
 if (WITH_CUDA)
