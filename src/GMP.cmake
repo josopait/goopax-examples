@@ -1,3 +1,4 @@
+if (NOT WIN32)
 include(ExternalProject)
 ExternalProject_Add(
   gmp
@@ -8,3 +9,4 @@ ExternalProject_Add(
   BUILD_COMMAND make
   INSTALL_COMMAND make -k install
 )
+endif()
