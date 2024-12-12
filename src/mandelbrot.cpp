@@ -27,10 +27,9 @@ static complex<double> clamp_range(const complex<double>& x)
 
 int main(int, char**)
 {
-    unique_ptr<sdl_window> window =
-        sdl_window::create("mandelbrot", { 640, 480 }, SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
+    sdl_window window("mandelbrot", { 640, 480 }, SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY);
 
-    kernel render(window->device,
+    kernel render(window.device,
                   [](image_resource<2, Vector<Tuint8_t, 4>, true>& image,
                      const complex<gpu_float> center,
                      const gpu_float scale) {
@@ -58,7 +57,7 @@ int main(int, char**)
                                              }
                                          }
 
-                                         Vector<gpu_float, 4> color = { 0, 0, 0.4, 0 };
+                                         Vector<gpu_float, 4> color = { 0, 0, 0.4, 1 };
 
                                          gpu_if(norm(z) >= 4.f)
                                          {
@@ -93,14 +92,14 @@ int main(int, char**)
 
     while (!quit)
     {
-        while (auto e = window->get_event())
+        while (auto e = window.get_event())
         {
-            Vector<Tuint, 2> window_size = window->get_size();
-            if (e->type == SDL_QUIT)
+            Vector<Tuint, 2> window_size = window.get_size();
+            if (e->type == SDL_EVENT_QUIT)
             {
                 quit = true;
             }
-            else if (e->type == SDL_FINGERDOWN)
+            else if (e->type == SDL_EVENT_FINGER_DOWN)
             {
                 ++num_fingers;
                 cout << "num_fingers=" << num_fingers << endl;
@@ -110,7 +109,7 @@ int main(int, char**)
                 }
                 fingermotion_active = false;
             }
-            else if (e->type == SDL_FINGERUP)
+            else if (e->type == SDL_EVENT_FINGER_UP)
             {
                 --num_fingers;
                 cout << "num_fingers=" << num_fingers << endl;
@@ -120,7 +119,7 @@ int main(int, char**)
                 }
             }
 
-            else if (e->type == SDL_FINGERMOTION)
+            else if (e->type == SDL_EVENT_FINGER_MOTION)
             {
                 cout << "fingermotion. x=" << e->tfinger.x << ", y=" << e->tfinger.y << endl;
 
@@ -146,9 +145,9 @@ int main(int, char**)
                 fingermotion_active = true;
             }
 
-            else if (e->type == SDL_MOUSEBUTTONDOWN)
+            else if (e->type == SDL_EVENT_MOUSE_BUTTON_DOWN)
             {
-                int x = 0, y = 0;
+                float x = 0, y = 0;
                 SDL_GetMouseState(&x, &y);
                 cout << "Mouse button " << e->button.button << ". x=" << x << ", y=" << y << endl;
 
@@ -164,29 +163,28 @@ int main(int, char**)
                     cout << "new center=" << moveto << ", scale=" << scale << endl;
                 }
             }
-            else if (e->type == SDL_MOUSEWHEEL)
+            else if (e->type == SDL_EVENT_MOUSE_WHEEL)
             {
                 speed_zoom -= e->wheel.y;
             }
-            else if (e->type == SDL_MULTIGESTURE)
+            /*            else if (e->type == SDL_MULTIGESTURE)
+                        {
+                            if (fabs(e->mgesture.dDist) > 0.002)
+                            {
+                                speed_zoom -= 10 * e->mgesture.dDist;
+                            }
+                        }
+            */
+            else if (e->type == SDL_EVENT_KEY_DOWN)
             {
-                if (fabs(e->mgesture.dDist) > 0.002)
-                {
-                    speed_zoom -= 10 * e->mgesture.dDist;
-                }
-            }
-
-            else if (e->type == SDL_KEYDOWN)
-            {
-                cout << "keydown. sym=" << e->key.keysym.sym << ", name=" << SDL_GetKeyName(e->key.keysym.sym) << endl;
-                switch (e->key.keysym.sym)
+                cout << "keydown. sym=" << e->key.key << ", name=" << SDL_GetKeyName(e->key.key) << endl;
+                switch (e->key.key)
                 {
                     case SDLK_ESCAPE:
                         quit = true;
                         break;
-                    case SDLK_f: {
-                        int err = SDL_SetWindowFullscreen(window->window,
-                                                          (is_fullscreen ? 0 : SDL_WINDOW_FULLSCREEN_DESKTOP));
+                    case SDLK_F: {
+                        int err = SDL_SetWindowFullscreen(window.window, (is_fullscreen ? false : true));
                         if (err == 0)
                         {
                             is_fullscreen = !is_fullscreen;
@@ -210,7 +208,7 @@ int main(int, char**)
 
         std::array<unsigned int, 2> render_size;
 
-        window->draw_goopax([&](image_buffer<2, Vector<Tuint8_t, 4>, true>& image) {
+        window.draw_goopax([&](image_buffer<2, Vector<Tuint8_t, 4>, true>& image) {
             render(image, static_cast<complex<float>>(center), scale);
             render_size = image.dimensions();
         });
@@ -222,7 +220,7 @@ int main(int, char**)
             auto rate = framecount / std::chrono::duration<double>(now - last_fps_time).count();
             title << "Mandelbrot: screen resolution=" << render_size[0] << "x" << render_size[1] << ", " << rate
                   << " fps";
-            window->set_title(title.str());
+            window.set_title(title.str());
             framecount = 0;
             last_fps_time = now;
         }
