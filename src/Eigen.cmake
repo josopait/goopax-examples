@@ -1,6 +1,6 @@
 if (WIN32)
 ExternalProject_Add(
-    eigen
+    eigen_tmp
     EXCLUDE_FROM_ALL 1
     STEP_TARGETS build install
     GIT_REPOSITORY https://gitlab.com/libeigen/eigen.git
@@ -11,7 +11,7 @@ ExternalProject_Add(
 )
 else()
 ExternalProject_Add(
-    eigen
+    eigen_tmp
     EXCLUDE_FROM_ALL 1
     STEP_TARGETS build install
     GIT_REPOSITORY https://gitlab.com/libeigen/eigen.git
