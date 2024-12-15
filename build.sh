@@ -5,7 +5,7 @@ set -e
 export goopax_DIR="$PWD/.."
 export Eigen3_DIR=dist/eigen
 export SDL3_DIR=dist/sdl3
-#export OpenCV_DIR=dist/opencv
+export OpenCV_DIR=dist/opencv
 
 if  [ "$(uname -o)" == "Msys" ]; then
     CMAKE_FLAGS="$CMAKE_FLAGS -DCMAKE_CONFIGURATION_TYPES=Debug -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDebug -DOpenCV_STATIC=ON"
