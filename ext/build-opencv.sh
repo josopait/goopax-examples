@@ -6,9 +6,9 @@ CMAKE_FLAGS="$CMAKE_FLAGS -DBUILD_ITT=0 -DBUILD_PERF_TESTS=0 -DBUILD_TESTS=0 -DB
 
 export Eigen3_DIR=dist/eigen
 
-if [ ! -d src/opencv ]; then
-    git clone https://github.com/opencv/opencv.git src/opencv -b 4.10.0 --recurse-submodules
+if [ ! -d ext/src/opencv ]; then
+    git clone https://github.com/opencv/opencv.git ext/src/opencv -b 4.10.0 --recurse-submodules
 fi
 
-cmake $CMAKE_FLAGS -B build/opencv src/opencv -DCMAKE_INSTALL_PREFIX="$PWD/dist/opencv"
-cmake --build build/opencv --target install
+cmake $CMAKE_FLAGS -B ext/build/opencv ext/src/opencv -DCMAKE_INSTALL_PREFIX="$PWD/dist/opencv"
+cmake --build ext/build/opencv --target install
