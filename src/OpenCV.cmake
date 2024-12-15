@@ -2,7 +2,9 @@
 if (WIN32)
 ExternalProject_Add(
     opencv
-    DEPENDS Eigen3::Eigen
+    #DEPENDS Eigen3::Eigen
+    #EXCLUDE_FROM_ALL 1
+    #STEP_TARGETS build install
     GIT_REPOSITORY https://github.com/opencv/opencv.git
     GIT_TAG 4.10.0
     GIT_SUBMODULES_RECURSE 1
@@ -28,7 +30,9 @@ ExternalProject_Add(
 else()
 ExternalProject_Add(
     opencv
-    DEPENDS Eigen3::Eigen
+    #DEPENDS Eigen3::Eigen
+    #EXCLUDE_FROM_ALL 1
+    #STEP_TARGETS build install
     GIT_REPOSITORY https://github.com/opencv/opencv.git
     GIT_TAG 4.10.0
     GIT_SUBMODULES_RECURSE 1
