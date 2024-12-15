@@ -8,7 +8,7 @@ fi
 export CMAKE_FLAGS="-DCMAKE_BUILD_TYPE=Release $CMAKE_FLAGS"
 
 cmake $CMAKE_FLAGS -B build src --install-prefix "$PWD/dist"
-./ext/build-eigen.sh
+cmake --build build --target eigen_tmp
 cmake --build build --target sdl3
 cmake --build build --target opencv
 
