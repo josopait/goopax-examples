@@ -104,7 +104,7 @@ endif()
 
 if (Eigen3_FOUND)
   make_goopax_exec(matmul)
-  target_link_libraries(matmul PRIVATE Eigen3:Eigen)
+  target_link_libraries(matmul PRIVATE Eigen3::Eigen)
 endif()
 
 if (OpenCL_FOUND)
