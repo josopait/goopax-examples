@@ -16,5 +16,5 @@ if  [ "$(uname -o)" == "Msys" ]; then
     echo "Not building boost and gmp on windows due to some difficulties"
 else
     cmake --build build --target boost
-#    cmake --build build --target gmp_tmp
+    cmake --build build --target gmp
 fi
