@@ -1,8 +1,6 @@
 if (WIN32)
 ExternalProject_Add(
     eigen
-    #EXCLUDE_FROM_ALL 1
-    #STEP_TARGETS build install
     GIT_REPOSITORY https://gitlab.com/libeigen/eigen.git
     GIT_TAG 3.4.0
     CMAKE_ARGS "-DCMAKE_CONFIGURATION_TYPES=Debug" "-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDebug"
@@ -12,8 +10,6 @@ ExternalProject_Add(
 else()
 ExternalProject_Add(
     eigen
-    #EXCLUDE_FROM_ALL 1
-    #STEP_TARGETS build install
     GIT_REPOSITORY https://gitlab.com/libeigen/eigen.git
     GIT_TAG 3.4.0
     CMAKE_ARGS

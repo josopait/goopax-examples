@@ -2,7 +2,7 @@
 if (WIN32)
 ExternalProject_Add(
     opencv
-    DEPENDS eigen
+    #DEPENDS eigen
     EXCLUDE_FROM_ALL 1
     STEP_TARGETS build install
     GIT_REPOSITORY https://github.com/opencv/opencv.git
@@ -30,7 +30,7 @@ ExternalProject_Add(
 else()
 ExternalProject_Add(
     opencv
-    DEPENDS eigen
+    #DEPENDS eigen
     EXCLUDE_FROM_ALL 1
     STEP_TARGETS build install
     GIT_REPOSITORY https://github.com/opencv/opencv.git
