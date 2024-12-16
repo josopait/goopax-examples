@@ -1,6 +1,6 @@
 include(ExternalProject)
 ExternalProject_Add(
-  gmp
+  gmp_gpx
   EXCLUDE_FROM_ALL 1
   STEP_TARGETS build install
   URL https://gmplib.org/download/gmp/gmp-6.3.0.tar.xz

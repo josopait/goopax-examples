@@ -1,8 +1,8 @@
 #export Eigen3_DIR=dist/eigen
 if (WIN32)
 ExternalProject_Add(
-    opencv
-    DEPENDS eigen_tmp
+    opencv_gpx
+    DEPENDS eigen_gpx
     EXCLUDE_FROM_ALL 1
     STEP_TARGETS build install
     GIT_REPOSITORY https://github.com/opencv/opencv.git
@@ -29,8 +29,8 @@ ExternalProject_Add(
 )
 else()
 ExternalProject_Add(
-    opencv
-    DEPENDS eigen_tmp
+    opencv_gpx
+    DEPENDS eigen_gpx
     EXCLUDE_FROM_ALL 1
     STEP_TARGETS build install
     GIT_REPOSITORY https://github.com/opencv/opencv.git

@@ -1,6 +1,6 @@
 if (WIN32)
 ExternalProject_Add(
-    sdl3
+    sdl3_gpx
     EXCLUDE_FROM_ALL 1
     STEP_TARGETS build install
     GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
@@ -21,7 +21,7 @@ ExternalProject_Add(
 )
 else()
 ExternalProject_Add(
-    sdl3
+    sdl3_gpx
     EXCLUDE_FROM_ALL 1
     STEP_TARGETS build install
     GIT_REPOSITORY https://github.com/libsdl-org/SDL.git

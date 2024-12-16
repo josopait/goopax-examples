@@ -1,5 +1,5 @@
 ExternalProject_Add(
-    boost
+    boost_gpx
     EXCLUDE_FROM_ALL 1
     STEP_TARGETS build install
     GIT_REPOSITORY https://github.com/boostorg/boost.git
