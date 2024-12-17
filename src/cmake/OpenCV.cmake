@@ -25,7 +25,7 @@ ExternalProject_Add(
       "-DWITH_OPENJPEG=0"
       "-DWITH_TIFF=0"
       "-DWITH_FFMPEG=0"
-      "--install-prefix ${CMAKE_INSTALL_PREFIX}/opencv"
+      "--install-prefix ${CMAKE_INSTALL_PREFIX}/../tmp/opencv"
 )
 else()
 ExternalProject_Add(
@@ -53,6 +53,6 @@ ExternalProject_Add(
       "-DWITH_OPENJPEG=0"
       "-DWITH_TIFF=0"
       "-DWITH_FFMPEG=0"
-      "--install-prefix ${CMAKE_INSTALL_PREFIX}/opencv"
+      "--install-prefix ${CMAKE_INSTALL_PREFIX}/../tmp/opencv"
 )
 endif()

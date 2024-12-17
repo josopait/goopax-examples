@@ -17,7 +17,7 @@ ExternalProject_Add(
       "-DSDL_OPENGLES=0"
       "-DSDL_GPU=0"
       "-DSDL_STATIC_PIC=ON"
-      "--install-prefix ${CMAKE_INSTALL_PREFIX}/sdl3"
+      "--install-prefix ${CMAKE_INSTALL_PREFIX}/../tmp/sdl3"
 )
 else()
 ExternalProject_Add(
@@ -31,6 +31,6 @@ ExternalProject_Add(
       "-DSDL_SHARED=0"
       "-DSDL_STATIC=1"
       "-DSDL_ASSEMBLY=0"
-      "--install-prefix ${CMAKE_INSTALL_PREFIX}/sdl3"
+      "--install-prefix ${CMAKE_INSTALL_PREFIX}/../tmp/sdl3"
 )
 endif()
