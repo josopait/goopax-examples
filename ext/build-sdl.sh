@@ -12,5 +12,5 @@ if [ ! -d ext/src/sdl3 ]; then
     git clone https://github.com/libsdl-org/SDL.git ext/src/sdl3
 fi
 
-cmake $CMAKE_FLAGS -B ext/build/sdl3 ext/src/sdl3 $SDL_FLAGS -DCMAKE_INSTALL_PREFIX="$PWD/dist/sdl3"
+cmake $CMAKE_FLAGS -B ext/build/sdl3 ext/src/sdl3 $SDL_FLAGS -DCMAKE_INSTALL_PREFIX="$PWD/tmp/sdl3"
 cmake --build ext/build/sdl3 --target install

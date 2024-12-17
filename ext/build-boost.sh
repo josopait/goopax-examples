@@ -9,5 +9,5 @@ if [ ! -d ext/src/boost ]; then
     git clone https://github.com/boostorg/boost.git ext/src/boost -b boost-1.86.0 --recurse-submodules
 fi
 
-cmake $CMAKE_FLAGS -B ext/build/boost ext/src/boost -DCMAKE_INSTALL_PREFIX="$PWD/dist/boost"
+cmake $CMAKE_FLAGS -B ext/build/boost ext/src/boost -DCMAKE_INSTALL_PREFIX="$PWD/tmp/boost"
 cmake --build ext/build/boost --target install

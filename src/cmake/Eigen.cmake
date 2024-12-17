@@ -7,7 +7,7 @@ ExternalProject_Add(
     GIT_TAG 3.4.0
     CMAKE_ARGS "-DCMAKE_CONFIGURATION_TYPES=Debug" "-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDebug"
       "-DBUILD_SHARED_LIBS=0"
-      "--install-prefix ${CMAKE_INSTALL_PREFIX}/eigen"
+      "--install-prefix ${CMAKE_INSTALL_PREFIX}/../tmp/eigen"
 )
 else()
 ExternalProject_Add(
@@ -18,6 +18,6 @@ ExternalProject_Add(
     GIT_TAG 3.4.0
     CMAKE_ARGS
       "-DBUILD_SHARED_LIBS=0"
-      "--install-prefix ${CMAKE_INSTALL_PREFIX}/eigen"
+      "--install-prefix ${CMAKE_INSTALL_PREFIX}/../tmp/eigen"
 )
 endif()

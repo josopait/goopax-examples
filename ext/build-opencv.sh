@@ -10,5 +10,5 @@ if [ ! -d ext/src/opencv ]; then
     git clone https://github.com/opencv/opencv.git ext/src/opencv -b 4.10.0 --recurse-submodules
 fi
 
-cmake $CMAKE_FLAGS -B ext/build/opencv ext/src/opencv -DCMAKE_INSTALL_PREFIX="$PWD/dist/opencv"
+cmake $CMAKE_FLAGS -B ext/build/opencv ext/src/opencv -DCMAKE_INSTALL_PREFIX="$PWD/tmp/opencv"
 cmake --build ext/build/opencv --target install
