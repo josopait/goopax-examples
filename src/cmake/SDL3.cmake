@@ -1,8 +1,8 @@
 if (WIN32)
 ExternalProject_Add(
     sdl3_gpx
-    EXCLUDE_FROM_ALL 1
-    STEP_TARGETS build install
+    #EXCLUDE_FROM_ALL 1
+    #STEP_TARGETS build install
     GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
     GIT_TAG main
     CMAKE_ARGS "-DCMAKE_CONFIGURATION_TYPES=Debug" "-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDebug"
@@ -22,8 +22,8 @@ ExternalProject_Add(
 else()
 ExternalProject_Add(
     sdl3_gpx
-    EXCLUDE_FROM_ALL 1
-    STEP_TARGETS build install
+    #EXCLUDE_FROM_ALL 1
+    #STEP_TARGETS build install
     GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
     GIT_TAG main
     CMAKE_ARGS
