@@ -1,7 +1,7 @@
 ExternalProject_Add(
     boost_gpx
-    #EXCLUDE_FROM_ALL 1
-    #STEP_TARGETS build install
+    EXCLUDE_FROM_ALL 1
+    STEP_TARGETS build install
     GIT_REPOSITORY https://github.com/boostorg/boost.git
     GIT_TAG boost-1.86.0
     GIT_SUBMODULES_RECURSE 1
