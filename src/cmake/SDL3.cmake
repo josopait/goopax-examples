@@ -1,8 +1,6 @@
 if (WIN32)
 ExternalProject_Add(
     sdl3_gpx
-    #EXCLUDE_FROM_ALL 1
-    #STEP_TARGETS build install
     GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
     GIT_TAG main
     CMAKE_ARGS "-DCMAKE_CONFIGURATION_TYPES=Debug" "-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDebug"
@@ -18,12 +16,11 @@ ExternalProject_Add(
       "-DSDL_GPU=0"
       "-DSDL_STATIC_PIC=ON"
       "--install-prefix ${CMAKE_INSTALL_PREFIX}/../tmp/sdl3"
+      #INSTALL_COMMAND ""
 )
 else()
 ExternalProject_Add(
     sdl3_gpx
-    #EXCLUDE_FROM_ALL 1
-    #STEP_TARGETS build install
     GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
     GIT_TAG main
     CMAKE_ARGS
@@ -32,5 +29,6 @@ ExternalProject_Add(
       "-DSDL_STATIC=1"
       "-DSDL_ASSEMBLY=0"
       "--install-prefix ${CMAKE_INSTALL_PREFIX}/../tmp/sdl3"
+    #INSTALL_COMMAND ""
 )
 endif()

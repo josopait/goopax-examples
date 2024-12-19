@@ -8,24 +8,24 @@ if  [ "$(uname -o)" == "Msys" ]; then
 fi
 export CMAKE_FLAGS="-DCMAKE_BUILD_TYPE=Release $CMAKE_FLAGS"
 
-cmake $CMAKE_FLAGS -B src/build src --install-prefix "$PWD/dist"
+cmake $CMAKE_FLAGS -B build . --install-prefix "$PWD/dist"
 if [ ! -d tmp/eigen ]; then
-    ./ext/build-eigen.sh
+    cmake --build build --target eigen_gpx
 fi
 if [ ! -d tmp/sdl3 ]; then
-    ./ext/build-sdl.sh
+    cmake --build build --target sdl3_gpx
 fi
 if [ ! -d tmp/opencv ]; then
-    ./ext/build-opencv.sh
+    cmake --build build --target opencv_gpx
 fi
 
 if  [ "$(uname -o)" == "Msys" ]; then
     echo "Not building boost and gmp on windows due to some difficulties"
 else
     if [ ! -d tmp/boost ]; then
-        ./ext/build-boost.sh
+        cmake --build build --target boost_gpx
     fi
     if [ ! -d tmp/gmp ]; then
-        ./ext/build-gmp.sh
+        cmake --build build --target gmp_gpx
     fi
 fi
