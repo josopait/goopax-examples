@@ -16,7 +16,7 @@ ExternalProject_Add(
       "-DSDL_GPU=0"
       "-DSDL_STATIC_PIC=ON"
       "--install-prefix ${CMAKE_INSTALL_PREFIX}/../tmp/sdl3"
-      #INSTALL_COMMAND ""
+#      INSTALL_COMMAND ""
 )
 else()
 ExternalProject_Add(
@@ -29,6 +29,6 @@ ExternalProject_Add(
       "-DSDL_STATIC=1"
       "-DSDL_ASSEMBLY=0"
       "--install-prefix ${CMAKE_INSTALL_PREFIX}/../tmp/sdl3"
-    #INSTALL_COMMAND ""
+#    INSTALL_COMMAND ""
 )
 endif()

@@ -6,6 +6,6 @@ ExternalProject_Add(
   BUILD_IN_SOURCE 1
   CONFIGURE_HANDLED_BY_BUILD 1
   CONFIGURE_COMMAND ./configure --prefix=${CMAKE_INSTALL_PREFIX}/../tmp/gmp --enable-static --disable-shared
-  #CONFIGURE_COMMAND ./configure --enable-static --disable-shared
-  #INSTALL_COMMAND ""
+#  CONFIGURE_COMMAND ./configure --enable-static --disable-shared
+#  INSTALL_COMMAND ""
 )

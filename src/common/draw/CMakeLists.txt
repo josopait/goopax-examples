@@ -4,7 +4,7 @@ find_package(Eigen3 3.3 NO_MODULE PATHS ../../../tmp/eigen)
 find_package(SDL3 PATHS ../../../tmp/sdl3)
 find_package(OpenGL)
 
-if (TARGET SDL3::SDL3 AND TARGET Eigen3::Eigen)
+if (TARGET sdl3 AND TARGET Eigen3::Eigen)
 
 if (TARGET OpenGL::GL)
     option(GOOPAX_DRAW_WITH_OPENGL "with OpenGL support" 1)
@@ -53,7 +53,7 @@ else()
 endif()
 
 #target_include_directories(goopax_draw SYSTEM PRIVATE "ext/glatter/include")
-target_link_libraries(goopax_draw PUBLIC SDL3::SDL3)
+target_link_libraries(goopax_draw PUBLIC sdl3)
 if (NOT APPLE)
   if (NOT WIN32)
     target_link_libraries(goopax_draw PUBLIC -lX11)
