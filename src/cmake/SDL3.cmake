@@ -3,6 +3,7 @@ ExternalProject_Add(
     sdl3_gpx
     GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
     GIT_TAG main
+    EXCLUDE_FROM_ALL 1
     CMAKE_ARGS "-DCMAKE_CONFIGURATION_TYPES=Debug" "-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDebug"
       "-DBUILD_SHARED_LIBS=0"
       "-DSDL_SHARED=0"
@@ -23,6 +24,7 @@ ExternalProject_Add(
     sdl3_gpx
     GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
     GIT_TAG main
+    EXCLUDE_FROM_ALL 1
     CMAKE_ARGS
       "-DBUILD_SHARED_LIBS=0"
       "-DSDL_SHARED=0"

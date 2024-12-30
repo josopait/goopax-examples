@@ -7,6 +7,7 @@ ExternalProject_Add(
     GIT_REPOSITORY https://github.com/opencv/opencv.git
     GIT_TAG 4.10.0
     GIT_SUBMODULES_RECURSE 1
+    EXCLUDE_FROM_ALL 1
     CMAKE_ARGS "-DCMAKE_CONFIGURATION_TYPES=Debug" "-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDebug"
       "-DBUILD_SHARED_LIBS=0"
       "-DBUILD_ITT=0"
@@ -35,6 +36,7 @@ ExternalProject_Add(
     GIT_REPOSITORY https://github.com/opencv/opencv.git
     GIT_TAG 4.10.0
     GIT_SUBMODULES_RECURSE 1
+    EXCLUDE_FROM_ALL 1
     CMAKE_ARGS
       "-DBUILD_SHARED_LIBS=0"
       "-DBUILD_ITT=0"

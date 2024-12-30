@@ -24,7 +24,7 @@ else
     fi
 fi
 
-cmake $CMAKE_FLAGS -B src/build src --install-prefix "$PWD/dist"
+cmake $CMAKE_FLAGS -DGOOPAX_EXAMPLES_BUILD_MISSING_LIBRARIES=0 -B src/build src --install-prefix "$PWD/dist"
 
 cmake --build src/build
 
