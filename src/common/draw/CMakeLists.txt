@@ -1,9 +1,10 @@
 option(GOOPAX_DEBUG "GOOPAX_DEBUG" OFF)
 
-find_package(Eigen3 3.3 NO_MODULE HINTS ../../../tmp/eigen)
-find_package(SDL3 HINTS ../../../tmp/sdl3)
+find_package(Eigen3 3.3 NO_MODULE PATHS ../../../tmp/eigen)
+find_package(SDL3 PATHS ../../../tmp/sdl3)
 find_package(OpenGL)
 
+#if (TARGET sdl3 AND TARGET Eigen3::Eigen)
 if (TARGET SDL3::SDL3 AND TARGET Eigen3::Eigen)
 
 if (TARGET OpenGL::GL)
@@ -53,6 +54,7 @@ else()
 endif()
 
 #target_include_directories(goopax_draw SYSTEM PRIVATE "ext/glatter/include")
+#target_link_libraries(goopax_draw PUBLIC sdl3)
 target_link_libraries(goopax_draw PUBLIC SDL3::SDL3)
 if (NOT APPLE)
   if (NOT WIN32)
