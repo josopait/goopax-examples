@@ -37,7 +37,6 @@ endif()
   )
   ExternalProject_Get_Property(build_sdl3 INSTALL_DIR)
   message("INSTALL_DIR=${INSTALL_DIR}")
-  add_dependencies(build_external_libraries build_sdl3)
 
 if (NOT WIN32)
   ExternalProject_Add(
@@ -51,7 +50,6 @@ if (NOT WIN32)
     CONFIGURE_COMMAND ./configure --enable-static --disable-shared
     INSTALL_COMMAND ""
   )
-  add_dependencies(build_external_libraries build_gmp)
 endif()
 
 
@@ -85,7 +83,6 @@ endif()
     "--install-prefix ${CMAKE_CURRENT_BINARY_DIR}/opencv"
     #    INSTALL_COMMAND ""
   )
-  add_dependencies(build_external_libraries build_opencv)
 
 
 
@@ -101,7 +98,6 @@ if (NOT WIN32)
     "--install-prefix ${CMAKE_CURRENT_BINARY_DIR}/boost"
     #    INSTALL_COMMAND ""
   )
-  add_dependencies(build_external_libraries build_boost)
 endif()
 
 
@@ -116,4 +112,3 @@ endif()
     "--install-prefix ${CMAKE_CURRENT_BINARY_DIR}/eigen"
     #    INSTALL_COMMAND ""
   )
-  add_dependencies(build_external_libraries build_eigen)

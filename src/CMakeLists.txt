@@ -42,6 +42,8 @@ if (WITH_CUDA)
   set (CMAKE_CUDA_STANDARD 17)
 endif()
 
+add_subdirectory(common/draw)
+
 macro(make_goopax_exec P)
   add_executable(${P} ${P}.cpp)
   target_link_libraries(${P} PRIVATE goopax::goopax)
