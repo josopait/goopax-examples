@@ -10,6 +10,29 @@ endif()
 
 
 if (NOT TARGET SDL3::SDL3)
+if (WIN32)
+  ExternalProject_Add(
+    build_sdl3
+    GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
+    GIT_TAG main
+    EXCLUDE_FROM_ALL 1
+    INSTALL_DIR "${CMAKE_CURRENT_BINARY_DIR}/sdl3"
+    CMAKE_ARGS "${MY_CMAKE_ARGS}"
+    "-DBUILD_SHARED_LIBS=0"
+    "-DSDL_SHARED=0"
+    "-DSDL_STATIC=1"
+    "-DSDL_ASSEMBLY=0"
+    "-DSDL_RENDER_D3D=0"
+    "-DSDL_RENDER_D3D11=0"
+    "-DSDL_RENDER_D3D12=0"
+    "-DSDL_OPENGL=1"
+    "-DSDL_OPENGLES=0"
+    "-DSDL_GPU=0"
+    "-DSDL_STATIC_PIC=ON"
+    "--install-prefix ${CMAKE_CURRENT_BINARY_DIR}/sdl3"
+    #    INSTALL_COMMAND ""
+  )
+else()
   ExternalProject_Add(
     build_sdl3
     GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
@@ -24,6 +47,7 @@ if (NOT TARGET SDL3::SDL3)
     "--install-prefix ${CMAKE_CURRENT_BINARY_DIR}/sdl3"
     #    INSTALL_COMMAND ""
   )
+endif()
   ExternalProject_Get_Property(build_sdl3 INSTALL_DIR)
   message("INSTALL_DIR=${INSTALL_DIR}")
   add_dependencies(build_external_libraries build_sdl3)
