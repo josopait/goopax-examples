@@ -1,4 +1,3 @@
-add_custom_target(build_external_libraries)
 include(ExternalProject)
 
 
@@ -21,7 +20,6 @@ else()
 endif()
 
 
-if (NOT TARGET SDL3::SDL3)
   ExternalProject_Add(
     build_sdl3
     GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
@@ -40,9 +38,7 @@ if (NOT TARGET SDL3::SDL3)
   ExternalProject_Get_Property(build_sdl3 INSTALL_DIR)
   message("INSTALL_DIR=${INSTALL_DIR}")
   add_dependencies(build_external_libraries build_sdl3)
-endif()
 
-if (NOT TARGET gmp)
 if (NOT WIN32)
   ExternalProject_Add(
     build_gmp
@@ -57,10 +53,8 @@ if (NOT WIN32)
   )
   add_dependencies(build_external_libraries build_gmp)
 endif()
-endif()
 
 
-if (NOT TARGET opencv)
   ExternalProject_Add(
     build_opencv
     #DEPENDS eigen_gpx
@@ -92,11 +86,9 @@ if (NOT TARGET opencv)
     #    INSTALL_COMMAND ""
   )
   add_dependencies(build_external_libraries build_opencv)
-endif()
 
 
 
-if (NOT TARGET Boost::system)
 if (NOT WIN32)
   ExternalProject_Add(
     build_boost
@@ -111,10 +103,8 @@ if (NOT WIN32)
   )
   add_dependencies(build_external_libraries build_boost)
 endif()
-endif()
 
 
-if (NOT TARGET Eigen3::Eigen)
   ExternalProject_Add(
     build_eigen
     GIT_REPOSITORY https://gitlab.com/libeigen/eigen.git
@@ -127,4 +117,3 @@ if (NOT TARGET Eigen3::Eigen)
     #    INSTALL_COMMAND ""
   )
   add_dependencies(build_external_libraries build_eigen)
-endif()
