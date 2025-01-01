@@ -43,7 +43,7 @@ if (NOT TARGET SDL3::SDL3)
 endif()
 
 if (NOT TARGET gmp)
-if (!WIN32)
+if (NOT WIN32)
   ExternalProject_Add(
     build_gmp
     URL https://gmplib.org/download/gmp/gmp-6.3.0.tar.xz
@@ -97,7 +97,7 @@ endif()
 
 
 if (NOT TARGET Boost::system)
-if (!WIN32)
+if (NOT WIN32)
   ExternalProject_Add(
     build_boost
     GIT_REPOSITORY https://github.com/boostorg/boost.git
