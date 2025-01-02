@@ -4,16 +4,8 @@ include(ExternalProject)
 
 if (WIN32)
   set(MY_CMAKE_ARGS "-DCMAKE_CONFIGURATION_TYPES=Debug" "-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDebug")
-  set(MY_SDL3_ARGS
-    "-DSDL_RENDER_D3D=0"
-    "-DSDL_RENDER_D3D11=0"
-    "-DSDL_RENDER_D3D12=0"
-    "-DSDL_OPENGL=1"
-    "-DSDL_OPENGLES=0"
-    "-DSDL_GPU=0"
-    "-DSDL_STATIC_PIC=ON"
-  )
-  set(MY_OPENCV_ARGS "-DOpenCV_STATIC=ON")
+  set(MY_SDL3_ARGS "-DSDL_STATIC_PIC=ON")
+  set(MY_OPENCV_ARGS "")
 else()
   set(MY_CMAKE_ARGS "")
   set(MY_SDL3_ARGS "")
@@ -35,7 +27,6 @@ if (NOT TARGET SDL3::SDL3)
     "-DSDL_STATIC=1"
     "-DSDL_ASSEMBLY=0"
     "--install-prefix ${CMAKE_CURRENT_BINARY_DIR}/sdl3"
-    #    INSTALL_COMMAND ""
   )
   ExternalProject_Get_Property(build_sdl3 INSTALL_DIR)
   message("INSTALL_DIR=${INSTALL_DIR}")
@@ -89,7 +80,6 @@ if (NOT TARGET opencv)
     "-DWITH_TIFF=0"
     "-DWITH_FFMPEG=0"
     "--install-prefix ${CMAKE_CURRENT_BINARY_DIR}/opencv"
-    #    INSTALL_COMMAND ""
   )
   add_dependencies(build_external_libraries build_opencv)
 endif()
@@ -107,7 +97,6 @@ if (NOT WIN32)
     INSTALL_DIR "${CMAKE_CURRENT_BINARY_DIR}/boost"
     CMAKE_ARGS "-DBUILD_SHARED_LIBS=0"
     "--install-prefix ${CMAKE_CURRENT_BINARY_DIR}/boost"
-    #    INSTALL_COMMAND ""
   )
   add_dependencies(build_external_libraries build_boost)
 endif()
@@ -124,7 +113,6 @@ if (NOT TARGET Eigen3::Eigen)
     CMAKE_ARGS "${MY_CMAKE_ARGS}"
     "-DBUILD_SHARED_LIBS=0"
     "--install-prefix ${CMAKE_CURRENT_BINARY_DIR}/eigen"
-    #    INSTALL_COMMAND ""
   )
   add_dependencies(build_external_libraries build_eigen)
 endif()
