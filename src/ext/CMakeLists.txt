@@ -4,12 +4,8 @@ include(ExternalProject)
 
 if (WIN32)
   set(MY_CMAKE_ARGS "-DCMAKE_CONFIGURATION_TYPES=Debug" "-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDebug")
-  set(MY_SDL3_ARGS "-DSDL_STATIC_PIC=ON")
-  set(MY_OPENCV_ARGS "")
 else()
   set(MY_CMAKE_ARGS "")
-  set(MY_SDL3_ARGS "")
-  set(MY_OPENCV_ARGS "")
 endif()
 
 
@@ -21,7 +17,6 @@ if (NOT TARGET SDL3::SDL3)
     EXCLUDE_FROM_ALL 1
     #INSTALL_DIR "${CMAKE_CURRENT_BINARY_DIR}/sdl3"
     CMAKE_ARGS "${MY_CMAKE_ARGS}"
-    "${MY_SDL3_ARGS}"
     "-DBUILD_SHARED_LIBS=0"
     "-DSDL_SHARED=0"
     "-DSDL_STATIC=1"
@@ -36,7 +31,7 @@ endif()
 if (NOT TARGET opencv)
   ExternalProject_Add(
     build_opencv
-    #DEPENDS eigen_gpx
+    #DEPENDS build_eigen
     #DEPENDS Eigen3::Eigen
     GIT_REPOSITORY https://github.com/opencv/opencv.git
     GIT_TAG 4.10.0
@@ -44,7 +39,6 @@ if (NOT TARGET opencv)
     EXCLUDE_FROM_ALL 1
     #INSTALL_DIR "${CMAKE_CURRENT_BINARY_DIR}/opencv"
     CMAKE_ARGS "${MY_CMAKE_ARGS}"
-    "${MY_OPENCV_ARGS}"
     "-DBUILD_SHARED_LIBS=0"
     "-DBUILD_ITT=0"
     "-DBUILD_PERF_TESTS=0"
