@@ -22,7 +22,7 @@ function(set_apple_properties P)
     set_property (TARGET ${TARGET} PROPERTY XCODE_ATTRIBUTE_${XCODE_PROPERTY} "${XCODE_VALUE}")
   endmacro (set_xcode_property2)
 
-  SET_XCODE_PROPERTY2(${P} DEVELOPMENT_TEAM "XXXXXXXXXX")    # Set your team development team ID here.
+  SET_XCODE_PROPERTY2(${P} DEVELOPMENT_TEAM "$ENV{APPLE_DEVELOPER_TEAM}")
 
   if (IOS)
     SET_XCODE_PROPERTY2(${P} CODE_SIGN_IDENTITY "iPhone Developer")
