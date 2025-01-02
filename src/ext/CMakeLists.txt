@@ -19,7 +19,7 @@ if (NOT TARGET SDL3::SDL3)
     GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
     GIT_TAG main
     EXCLUDE_FROM_ALL 1
-    INSTALL_DIR "${CMAKE_CURRENT_BINARY_DIR}/sdl3"
+    #INSTALL_DIR "${CMAKE_CURRENT_BINARY_DIR}/sdl3"
     CMAKE_ARGS "${MY_CMAKE_ARGS}"
     "${MY_SDL3_ARGS}"
     "-DBUILD_SHARED_LIBS=0"
@@ -60,7 +60,7 @@ if (NOT TARGET opencv)
     GIT_TAG 4.10.0
     GIT_SUBMODULES_RECURSE 1
     EXCLUDE_FROM_ALL 1
-    INSTALL_DIR "${CMAKE_CURRENT_BINARY_DIR}/opencv"
+    #INSTALL_DIR "${CMAKE_CURRENT_BINARY_DIR}/opencv"
     CMAKE_ARGS "${MY_CMAKE_ARGS}"
     "${MY_OPENCV_ARGS}"
     "-DBUILD_SHARED_LIBS=0"
@@ -94,7 +94,7 @@ if (NOT WIN32)
     GIT_TAG boost-1.86.0
     GIT_SUBMODULES_RECURSE 1
     EXCLUDE_FROM_ALL 1
-    INSTALL_DIR "${CMAKE_CURRENT_BINARY_DIR}/boost"
+    #INSTALL_DIR "${CMAKE_CURRENT_BINARY_DIR}/boost"
     CMAKE_ARGS "-DBUILD_SHARED_LIBS=0"
     "--install-prefix ${CMAKE_CURRENT_BINARY_DIR}/boost"
   )
@@ -109,10 +109,11 @@ if (NOT TARGET Eigen3::Eigen)
     GIT_REPOSITORY https://gitlab.com/libeigen/eigen.git
     GIT_TAG 3.4.0
     EXCLUDE_FROM_ALL 1
-    INSTALL_DIR "${CMAKE_CURRENT_BINARY_DIR}/eigen"
+    #INSTALL_DIR "${CMAKE_CURRENT_BINARY_DIR}/eigen"
     CMAKE_ARGS "${MY_CMAKE_ARGS}"
     "-DBUILD_SHARED_LIBS=0"
     "--install-prefix ${CMAKE_CURRENT_BINARY_DIR}/eigen"
+    INSTALL_COMMAND ""
   )
   add_dependencies(build_external_libraries build_eigen)
 endif()
