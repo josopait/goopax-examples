@@ -63,6 +63,7 @@ endif()
 
 
 if (NOT TARGET Boost::system)
+if (NOT WIN32)
   ExternalProject_Add(
     build_boost
     GIT_REPOSITORY https://github.com/boostorg/boost.git
@@ -74,6 +75,7 @@ if (NOT TARGET Boost::system)
     "--install-prefix ${CMAKE_CURRENT_BINARY_DIR}/boost"
   )
   add_dependencies(build_external_libraries build_boost)
+endif()
 endif()
 
 
