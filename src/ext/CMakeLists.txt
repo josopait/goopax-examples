@@ -29,7 +29,6 @@ if (NOT TARGET SDL3::SDL3)
 endif()
 
 if (NOT TARGET opencv)
-if (TARGET Eigen3::Eigen)
   ExternalProject_Add(
     build_opencv
     #DEPENDS Eigen3::Eigen
@@ -58,7 +57,6 @@ if (TARGET Eigen3::Eigen)
     "--install-prefix ${CMAKE_CURRENT_BINARY_DIR}/opencv"
   )
   add_dependencies(build_external_libraries build_opencv)
-endif()
 endif()
 
 
