@@ -3,7 +3,7 @@ include(ExternalProject)
 
 
 if (WIN32)
-  set(MY_CMAKE_ARGS "-DCMAKE_CONFIGURATION_TYPES=Debug" "-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDebug")
+  set(MY_CMAKE_ARGS "-DCMAKE_CONFIGURATION_TYPES=Debug" "-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDebug" "-DCMAKE_BUILD_TYPE=Debug")
 else()
   set(MY_CMAKE_ARGS "")
 endif()
@@ -29,9 +29,9 @@ if (NOT TARGET SDL3::SDL3)
 endif()
 
 if (NOT TARGET opencv)
+if (TARGET Eigen3::Eigen)
   ExternalProject_Add(
     build_opencv
-    #DEPENDS build_eigen
     #DEPENDS Eigen3::Eigen
     GIT_REPOSITORY https://github.com/opencv/opencv.git
     GIT_TAG 4.10.0
@@ -58,6 +58,7 @@ if (NOT TARGET opencv)
     "--install-prefix ${CMAKE_CURRENT_BINARY_DIR}/opencv"
   )
   add_dependencies(build_external_libraries build_opencv)
+endif()
 endif()
 
 
