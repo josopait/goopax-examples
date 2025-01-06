@@ -2,13 +2,6 @@ add_custom_target(build_external_libraries)
 include(ExternalProject)
 
 
-if (WIN32)
-  set(MY_CMAKE_ARGS "-DCMAKE_CONFIGURATION_TYPES=Debug" "-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDebug" "-DCMAKE_BUILD_TYPE=Debug")
-else()
-  set(MY_CMAKE_ARGS "")
-endif()
-
-
 if (NOT TARGET SDL3::SDL3)
   ExternalProject_Add(
     build_sdl3
