@@ -4,22 +4,29 @@ project(goopax_examples LANGUAGES CXX)
 
 set (CMAKE_CXX_STANDARD 20)
 
-if (APPLE)
-  enable_language(OBJCXX)
-  set (CMAKE_OBJCXX_STANDARD 20)
-  include(cmake/common.cmake)
-endif()
-
 # Disabling cuda examples by default because of compatibility issues between cuda and gcc>=13
 option(WITH_CUDA "WITH_CUDA" OFF)
 
-set(CMAKE_INSTALL_RPATH_USE_LINK_PATH on)
+include(cmake/macros.cmake)
 
+set(MY_CMAKE_ARGS "")
+set(APPEND MY_CMAKE_ARGS "-DCMAKE_INSTALL_RPATH_USE_LINK_PATH:BOOL=on")
+if (WITH_CUDA)
+  find_package(CUDA)
+  project(goopax_examples LANGUAGES CXX CUDA)
+  list(APPEND MY_CMAKE_ARGS "-DCMAKE_CUDA_STANDARD:STRING=17")
+endif()
+if (WIN32)
+  list(APPEND MY_CMAKE_ARGS "-DCMAKE_CONFIGURATION_TYPES:STRING=Debug" "-DCMAKE_MSVC_RUNTIME_LIBRARY:STRING=MultiThreadedDebug" "-DCMAKE_BUILD_TYPE:STRING=Debug" "-DOpenCV_STATIC:BOOL=ON")
+  make_persistent("${MY_CMAKE_ARGS}")
+elseif (APPLE)
+  enable_language(OBJCXX)
+  list(APPEND MY_CMAKE_ARGS "-DCMAKE_OBJCXX_STANDARD:STRING=20")
+  include(cmake/common.cmake)
+endif()
 if (ANDROID OR IOS)
   message("Applying toolchain workaround, so that packages are found.")
-  set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE BOTH)
-  set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY BOTH)
-  set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE BOTH)
+  list(APPEND MY_CMAKE_ARGS "-DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE:STRING=BOTH" "-DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY:STRING=BOTH" "-DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE:STRING=BOTH")
 endif()
 
 find_package(goopax REQUIRED PATHS ../..)
@@ -28,33 +35,11 @@ find_package(OpenCL)
 find_package(Boost 1.65.0 COMPONENTS system PATHS "${CMAKE_BINARY_DIR}/ext/boost")
 find_package(SDL3 PATHS "${CMAKE_BINARY_DIR}/ext/sdl3")
 find_package(Eigen3 3.3 NO_MODULE PATHS "${CMAKE_BINARY_DIR}/ext/eigen")
-
 find_package(OpenCV PATHS "${CMAKE_BINARY_DIR}/ext/opencv")
-
-find_library(gmp_LIBRARY NAMES libgmp.a gmp PATHS "${CMAKE_BINARY_DIR}/ext/build_gmp-prefix/src/build_gmp/.libs/")
-find_path(gmp_INCLUDE NAMES gmp.h PATHS "${CMAKE_BINARY_DIR}/ext/build_gmp-prefix/src/build_gmp")
 
 add_subdirectory(ext)
 
-if (WITH_CUDA)
-  find_package(CUDA)
-  project(goopax_examples LANGUAGES CXX CUDA)
-  set (CMAKE_CUDA_STANDARD 17)
-endif()
-
 add_subdirectory(common/draw)
-
-macro(make_goopax_exec P)
-  add_executable(${P} ${P}.cpp)
-  target_link_libraries(${P} PRIVATE goopax::goopax)
-  if (UNIX AND NOT APPLE AND NOT CYGWIN AND NOT ANDROID)
-    target_link_libraries(${P} PRIVATE -ltbb)
-  endif()
-  if (IOS)
-    set_apple_properties(${P})
-  endif()
-  install(TARGETS ${P} DESTINATION bin)
-endmacro()
 
 if (GOOPAX_DRAW_WITH_OPENGL OR GOOPAX_DRAW_WITH_METAL AND NOT GOOPAX_DEBUG)
   make_goopax_exec(nbody)
@@ -75,13 +60,9 @@ if (OpenCV_FOUND AND TARGET goopax_draw)
   endif()
 endif()
 
-if (NOT "${gmp_LIBRARY}" STREQUAL "gmp_LIBRARY-NOTFOUND" AND
-    NOT "${gmp_INCLUDE}" STREQUAL "gmp_INCLUDE-NOTFOUND" AND
-    Boost_FOUND AND
+if (Boost_FOUND AND
     TARGET goopax_draw)
   make_goopax_exec(deep-zoom-mandelbrot)
-  target_link_libraries(deep-zoom-mandelbrot PRIVATE ${gmp_LIBRARY})
-  target_include_directories(deep-zoom-mandelbrot SYSTEM PRIVATE ${gmp_INCLUDE})
   target_link_libraries(deep-zoom-mandelbrot PRIVATE Boost::system goopax_draw)
 endif()
 
