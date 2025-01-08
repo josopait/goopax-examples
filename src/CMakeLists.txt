@@ -10,7 +10,7 @@ option(WITH_CUDA "WITH_CUDA" OFF)
 include(cmake/macros.cmake)
 
 set(MY_CMAKE_ARGS "")
-set(APPEND MY_CMAKE_ARGS "-DCMAKE_INSTALL_RPATH_USE_LINK_PATH:BOOL=on")
+list(APPEND MY_CMAKE_ARGS "-DCMAKE_INSTALL_RPATH_USE_LINK_PATH:BOOL=on")
 if (WITH_CUDA)
   find_package(CUDA)
   project(goopax_examples LANGUAGES CXX CUDA)
