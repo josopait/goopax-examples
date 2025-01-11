@@ -300,7 +300,9 @@ struct matmul
     VectorX<double> test_vector;
 
     kernel<void()> kernel_naive;
+#if !GOOPAX_DEBUG
     kernel<void()> kernel_tensor;
+#endif
 
     matmul(goopax_device device0, unsigned int Nk0, unsigned int Nl0, unsigned int Nm0)
         : device(device0)
@@ -345,41 +347,72 @@ struct matmul
                     gpu_for(0, Nl, [&](gpu_uint l) {
                         sum += A[k * Nl + l] * static_cast<gpu_c_float_type>(B[l * Nm + m]);
                     });
-                    C[k * Nk + m] = sum;
+                    C[k * Nm + m] = sum;
                 });
             });
         });
 
+#if !GOOPAX_DEBUG
         kernel_tensor.assign(device, [this]() {
             const_resource A(this->A);
             const_resource B(this->B);
             resource C(this->C);
 
+            // sub-matrix sizes used in tensor cores
             constexpr uint bk = 16;
             constexpr uint bl = 16;
             constexpr uint bm = 16;
 
-            wmma::matrix<wmma::matrix_a, bk, bl, bm, ab_float_type> ma;
-            wmma::matrix<wmma::matrix_b, bk, bl, bm, ab_float_type> mb;
-            wmma::matrix<wmma::accumulator, bk, bl, bm, c_float_type> mc;
-            gpu_for_group(0, (Nk / bk) * (Nm / bm), [&](gpu_uint block) {
-                gpu_uint koff = block / (Nm / bm) * bk;
-                gpu_uint moff = block % (Nm / bm) * bm;
+            // Further increasing block size to reduce memory access.
+            constexpr uint ck = 4;
+            constexpr uint cm = 4;
 
-                mc.fill(0);
+            assert(Nk % (bk * ck) == 0);
+            assert(Nl % (bl) == 0);
+            assert(Nm % (bm * cm) == 0);
+
+            wmma::matrix<wmma::matrix_a, bk, bm, bl, ab_float_type> ma;
+            wmma::matrix<wmma::matrix_b, bk, bm, bl, ab_float_type> mb;
+            Matrix<wmma::matrix<wmma::accumulator, bk, bm, bl, c_float_type>, ck, cm> mc;
+            gpu_for_group(0, (Nk / bk / ck) * (Nm / bm / cm), [&](gpu_uint block) {
+                gpu_uint koff = block / (Nm / bm / cm) * bk * ck;
+                gpu_uint moff = block % (Nm / bm / cm) * bm * cm;
+
+                for (unsigned int sk = 0; sk < ck; ++sk)
+                {
+                    for (unsigned int sm = 0; sm < cm; ++sm)
+                    {
+                        mc(sk, sm).fill(0);
+                    }
+                }
 
                 gpu_for(0, Nl, bl, [&](gpu_uint loff) {
-                    ma.load(A.begin() + koff * Nl + loff, Nl);
-                    mb.load(B.begin() + loff * Nm + moff, Nm);
-                    mc = multiply_add(ma, mb, mc);
+                    for (unsigned int sk = 0; sk < ck; ++sk)
+                    {
+                        for (unsigned int sm = 0; sm < cm; ++sm)
+                        {
+                            ma.load(A.begin() + (koff + sk * bk) * Nl + loff, Nl);
+                            mb.load(B.begin() + loff * Nm + (moff + sm * bm), Nm);
+                            mc(sk, sm) = multiply_add(ma, mb, mc(sk, sm));
+                        }
+                    }
                 });
-                mc.store(C.begin() + koff * Nm + moff, Nm, wmma::row_major);
+                for (unsigned int sk = 0; sk < ck; ++sk)
+                {
+                    for (unsigned int sm = 0; sm < cm; ++sm)
+                    {
+                        mc(sk, sm).store(C.begin() + (koff + sk * bk) * Nm + (moff + sm * bm), Nm, wmma::row_major);
+                    }
+                }
             });
         });
+#endif
     }
 
     void run(kernel<void()>& kernel_use)
     {
+        C.fill(numeric_limits<c_float_type>::quiet_NaN()).wait();
+
         Tsize_t count = 0;
         auto time_start = steady_clock::now();
         while (steady_clock::now() < time_start + seconds(1))
@@ -424,6 +457,8 @@ int main(int argc, char** argv)
 
     cout << "\ntrying naive kernel." << endl;
     mat.run(mat.kernel_naive);
+#if !GOOPAX_DEBUG
     cout << "\ntrying tensor kernel." << endl;
     mat.run(mat.kernel_tensor);
+#endif
 }
