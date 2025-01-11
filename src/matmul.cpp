@@ -15,16 +15,11 @@ using namespace boost::chrono;
 using namespace std::chrono;
 #endif
 using namespace goopax;
-using namespace goopax::release;
 using namespace std;
-using namespace types;
 
-PARAMOPT<Tsize_t> NK("nk", 2048); // Matrix sizes. Can be specified as command line arguments,
-PARAMOPT<Tsize_t> NL("nl", 2048); // e.g., --nk=128 --nl=256 --nm=384
-PARAMOPT<Tsize_t> NM("nm", 2048);
-PARAMOPT<Tbool> VERIFY("verify", false); // Use --verify=1 to test the result.
-PARAMOPT<Tbool> USE_DOUBLE("double", false);
-PARAMOPT<Tint> USE_DEVICE("use_device", -1);
+PARAMOPT<size_t> NK("nk", 2048); // Matrix sizes. Can be specified as command line arguments,
+PARAMOPT<size_t> NL("nl", 2048); // e.g., --nk=128 --nl=256 --nm=384
+PARAMOPT<size_t> NM("nm", 2048);
 
 #ifdef _MSC_VER
 #define vector std::vector
@@ -302,6 +297,7 @@ struct matmul
     std::random_device rd;
     WELL512_data rnd;
     kernel<void(buffer<ab_float_type>& a)> fill_random;
+    VectorX<double> test_vector;
 
     kernel<void()> kernel_naive;
     kernel<void()> kernel_tensor;
@@ -328,6 +324,16 @@ struct matmul
         fill_random(A);
         fill_random(B);
 
+        {
+            std::default_random_engine generator;
+            std::normal_distribution<double> distribution;
+            test_vector = VectorX<double>(Nm);
+            for (double& e : test_vector)
+            {
+                e = distribution(generator);
+            }
+        }
+
         kernel_naive.assign(device, [this]() {
             const_resource A(this->A);
             const_resource B(this->B);
@@ -336,7 +342,9 @@ struct matmul
             gpu_for_group(0, Nk, [&](gpu_uint k) {
                 gpu_for_local(0, Nm, [&](gpu_uint m) {
                     gpu_c_float_type sum = 0;
-                    gpu_for(0, Nl, [&](gpu_uint l) { sum += A[k * Nl + l] * B[l * Nm + m]; });
+                    gpu_for(0, Nl, [&](gpu_uint l) {
+                        sum += A[k * Nl + l] * static_cast<gpu_c_float_type>(B[l * Nm + m]);
+                    });
                     C[k * Nk + m] = sum;
                 });
             });
@@ -372,9 +380,6 @@ struct matmul
 
     void run(kernel<void()>& kernel_use)
     {
-        fill_random(A);
-        fill_random(B);
-
         Tsize_t count = 0;
         auto time_start = steady_clock::now();
         while (steady_clock::now() < time_start + seconds(1))
@@ -387,6 +392,21 @@ struct matmul
         auto FLOPS = Tdouble(NK()) * NL() * NM() * 2 * count / time;
         cout << "Did " << count << " matrix multiplications in " << time << " seconds. Performance: " << FLOPS / 1E12
              << " TFLOPS" << endl;
+
+        {
+            buffer_map A(this->A);
+            buffer_map B(this->B);
+            buffer_map C(this->C);
+
+            Map<Matrix<ab_float_type, Dynamic, Dynamic, RowMajor>> TA(A.data(), Nk, Nl);
+            Map<Matrix<ab_float_type, Dynamic, Dynamic, RowMajor>> TB(B.data(), Nl, Nm);
+            Map<Matrix<c_float_type, Dynamic, Dynamic, RowMajor>> TC(C.data(), Nk, Nm);
+
+            VectorX<double> rwant = TA.template cast<double>() * (TB.template cast<double>() * test_vector);
+            VectorX<double> rhave = TC.template cast<double>() * test_vector;
+
+            cout << "err=" << (rhave - rwant).norm() / rwant.norm() << endl;
+        }
     }
 };
 
@@ -394,7 +414,13 @@ int main(int argc, char** argv)
 {
     init_params(argc, argv);
 
-    matmul<Thalf, Tfloat> mat(default_device(), NK(), NL(), NM());
+#if GOOPAX_DEBUG
+    goopax_device device = default_device(env_CPU);
+#else
+    goopax_device device = default_device();
+#endif
+
+    matmul<Thalf, Tfloat> mat(device, NK(), NL(), NM());
 
     cout << "\ntrying naive kernel." << endl;
     mat.run(mat.kernel_naive);

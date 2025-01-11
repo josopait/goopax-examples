@@ -68,7 +68,7 @@ add(pi)
 add(simple)
 add(race-condition)
 add(helloworld)
-add(matmul Eigen3::Eigen)
+add(matmul Eigen3::Eigen goopax_draw)
 add(cl-interop-1 OpenCL::OpenCL)
 add(cl-interop-2 OpenCL::OpenCL)
 
