@@ -1,3 +1,4 @@
+#include <goopax_extra/random.hpp>
 #include <random>
 
 #include "common/draw/types.h"
@@ -284,179 +285,119 @@ void matmul_reg_and_localmem(matrix_wrapper<resource<float_type>&>& C,
 }
 
 // This is the kernel class.
-template<class float_type>
+template<typename ab_float_type, typename c_float_type>
 struct matmul
 {
-    decltype(matmul_naive<float_type>)& matmulfunc; // function pointer
+    using gpu_ab_float_type = typename make_gpu<ab_float_type>::type;
+    using gpu_c_float_type = typename make_gpu<c_float_type>::type;
+    const unsigned int Nk;
+    const unsigned int Nl;
+    const unsigned int Nm;
 
-    kernel<void(buffer<float_type>& Craw,
-                const buffer<float_type>& Araw,
-                const buffer<float_type>& Braw,
-                Tuint Nk,
-                Tuint Nl,
-                Tuint Nm)>
-        Kernel;
+    goopax_device device;
+    buffer<ab_float_type> A;
+    buffer<ab_float_type> B;
+    buffer<c_float_type> C;
 
-    void run(goopax_device device);
+    std::random_device rd;
+    WELL512_data rnd;
+    kernel<void(buffer<ab_float_type>& a)> fill_random;
 
-    matmul(goopax_device device, decltype(matmulfunc)& matmulfunc0)
-        : matmulfunc(matmulfunc0)
+    kernel<void()> kernel_naive;
+    kernel<void()> kernel_tensor;
+
+    matmul(goopax_device device0, unsigned int Nk0, unsigned int Nl0, unsigned int Nm0)
+        : device(device0)
+        , Nk(Nk0)
+        , Nl(Nl0)
+        , Nm(Nm0)
+        , rnd(device, device.default_global_size_max(), rd())
     {
-        Kernel.assign(device,
-                      [this](resource<float_type>& Craw,
-                             const resource<float_type>& Araw,
-                             const resource<float_type>& Braw,
-                             gpu_uint Nk,
-                             gpu_uint Nl,
-                             gpu_uint Nm) {
-                          // Declare matrix resources.
-                          matrix_wrapper<resource<float_type>&> C(Nk, Nm, Craw);
-                          const matrix_wrapper<const resource<float_type>&> A(Nk, Nl, Araw);
-                          const matrix_wrapper<const resource<float_type>&> B(Nl, Nm, Braw);
+        A.assign(device, Nk * Nl);
+        B.assign(device, Nl * Nm);
+        C.assign(device, Nk * Nm);
 
-                          // Call the multiplication. The actual algorithm is outsources into matmulfunc.
-                          matmulfunc(C, A, B);
-                      });
-    }
-};
+        fill_random.assign(device, [this](resource<ab_float_type>& a) {
+            WELL512_lib rndlib(rnd);
 
-template<class float_type>
-void matmul<float_type>::run(goopax_device device)
-{
-    // This function does the test setup for the specified precision and algorithm.
+            for_each_global(a.begin(), a.end(), [&](gpu_ab_float_type& v) {
+                v = static_cast<gpu_ab_float_type>(rndlib.gaussian_distribution());
+            });
+        });
 
-    // Allocate memory on video card.
-    buffer<float_type> A(device, NK() * NL());
-    buffer<float_type> B(device, NL() * NM());
-    buffer<float_type> C(device, NK() * NM());
-    C.fill(-1);
+        fill_random(A);
+        fill_random(B);
 
-    // Allocate cpu memory for comparison.
-    matrix_wrapper<vector<float_type>> Acpu(NK(), NL(), NK() * NL());
-    matrix_wrapper<vector<float_type>> Bcpu(NL(), NM(), NL() * NM());
-    matrix_wrapper<vector<float_type>> Ccpu(NK(), NM(), NK() * NM());
+        kernel_naive.assign(device, [this]() {
+            const_resource A(this->A);
+            const_resource B(this->B);
+            resource C(this->C);
 
-    std::default_random_engine generator;
-    std::normal_distribution<float_type> distribution;
-    // Fill A and B matrices with some values.
-    for (Tuint k = 0; k < NK(); ++k)
-    {
-        for (Tuint l = 0; l < NL(); ++l)
-        {
-            Acpu[k][l] = distribution(generator);
-        }
-    }
-    for (Tuint l = 0; l < NL(); ++l)
-    {
-        for (Tuint m = 0; m < NM(); ++m)
-        {
-            Bcpu[l][m] = distribution(generator);
-        }
-    }
+            gpu_for_group(0, Nk, [&](gpu_uint k) {
+                gpu_for_local(0, Nm, [&](gpu_uint m) {
+                    gpu_c_float_type sum = 0;
+                    gpu_for(0, Nl, [&](gpu_uint l) { sum += A[k * Nl + l] * B[l * Nm + m]; });
+                    C[k * Nk + m] = sum;
+                });
+            });
+        });
 
-    A.copy_from_host(Acpu.res.data());
-    B.copy_from_host(Bcpu.res.data());
+        kernel_tensor.assign(device, [this]() {
+            const_resource A(this->A);
+            const_resource B(this->B);
+            resource C(this->C);
 
-    // Instantiate the kernel
+            constexpr uint bk = 16;
+            constexpr uint bl = 16;
+            constexpr uint bm = 16;
 
-    // Call the kernel. This will calculate C=A*B. The first call may take longer due to initialization.
-    Kernel(C, A, B, NK(), NL(), NM());
+            wmma::matrix<wmma::matrix_a, bk, bl, bm, ab_float_type> ma;
+            wmma::matrix<wmma::matrix_b, bk, bl, bm, ab_float_type> mb;
+            wmma::matrix<wmma::accumulator, bk, bl, bm, c_float_type> mc;
+            gpu_for_group(0, (Nk / bk) * (Nm / bm), [&](gpu_uint block) {
+                gpu_uint koff = block / (Nm / bm) * bk;
+                gpu_uint moff = block % (Nm / bm) * bm;
 
-    C.copy_to_host(Ccpu.res.data());
+                mc.fill(0);
 
-    // Display matrices if they are reasonably small.
-    if (NK() * NL() + NL() * NM() < 10000)
-    {
-        cout << "\nA=\n"
-             << Acpu << "\n"
-             << "\nB=\n"
-             << Bcpu << "\n"
-             << "\nC=\n"
-             << Ccpu << "\n"
-             << endl;
+                gpu_for(0, Nl, bl, [&](gpu_uint loff) {
+                    ma.load(A.begin() + koff * Nl + loff, Nl);
+                    mb.load(B.begin() + loff * Nm + moff, Nm);
+                    mc = multiply_add(ma, mb, mc);
+                });
+                mc.store(C.begin() + koff * Nm + moff, Nm, wmma::row_major);
+            });
+        });
     }
 
-    // Now do performance measurements.
-    for (Tuint k = 0; k < 3; ++k)
+    void run(kernel<void()>& kernel_use)
     {
+        fill_random(A);
+        fill_random(B);
+
         Tsize_t count = 0;
-        auto time_start = high_resolution_clock::now();
-        while (high_resolution_clock::now() < time_start + seconds(1))
+        auto time_start = steady_clock::now();
+        while (steady_clock::now() < time_start + seconds(1))
         {
-            Kernel(C, A, B, NK(), NL(), NM());
+            kernel_use();
             ++count;
             device.wait_all();
         }
-        Tdouble time = duration_cast<duration<double>>(high_resolution_clock::now() - time_start).count();
+        Tdouble time = duration_cast<duration<double>>(steady_clock::now() - time_start).count();
         auto FLOPS = Tdouble(NK()) * NL() * NM() * 2 * count / time;
         cout << "Did " << count << " matrix multiplications in " << time << " seconds. Performance: " << FLOPS / 1E12
              << " TFLOPS" << endl;
     }
-
-    // Verify the result if --verify=1 has been specified
-    if (VERIFY())
-    {
-        float_type maxerr = 0;
-        for (Tsize_t k = 0; k < NK(); ++k)
-        {
-            cout << "k=" << k << " / " << NK() << endl;
-            for (Tsize_t m = 0; m < NM(); ++m)
-            {
-                float_type Ctmp = 0;
-                for (Tuint l = 0; l < NL(); ++l)
-                {
-                    Ctmp += Acpu[k][l] * Bcpu[l][m];
-                }
-                maxerr = max(maxerr, abs(Ctmp - Ccpu[k][m]));
-                if (!(abs(Ctmp - Ccpu[k][m]) < 1E-3))
-                {
-                    std::cerr << "Results differ: cpu: C[" << k << "][" << m << "]=" << Ctmp << ", gpu: C[" << k << "]["
-                              << m << "]=" << Ccpu[k][m] << endl;
-                    throw EX::general();
-                }
-            }
-        }
-        cout << "verification ok." << endl;
-        cout << "maxerr=" << maxerr << endl;
-    }
-}
-
-template<typename float_type>
-void run(goopax_device device)
-{
-    matmul<float_type> naive(device, matmul_naive<float_type>);
-    matmul<float_type> reg(device, matmul_reg<float_type>);
-    matmul<float_type> reg_lm(device, matmul_reg_and_localmem<float_type>);
-
-    {
-        cout << "\nnaive:" << endl;
-        naive.run(device);
-
-        cout << "\nreg:" << endl;
-        reg.run(device);
-
-        cout << "\nreg and localmem:" << endl;
-        reg_lm.run(device);
-    }
-}
+};
 
 int main(int argc, char** argv)
 {
     init_params(argc, argv);
 
-    goopax_device device = default_device();
+    matmul<Thalf, Tfloat> mat(default_device(), NK(), NL(), NM());
 
-    if (USE_DEVICE() != -1)
-    {
-        device = devices()[USE_DEVICE()];
-    }
-
-    assert(NK() % 128 == 0); // For simplicity, require matrix sizes to be multiples of 128.
-    assert(NL() % 128 == 0);
-    assert(NM() % 128 == 0);
-
-    if (USE_DOUBLE())
-        run<Tdouble>(device);
-    else
-        run<Tfloat>(device);
+    cout << "\ntrying naive kernel." << endl;
+    mat.run(mat.kernel_naive);
+    cout << "\ntrying tensor kernel." << endl;
+    mat.run(mat.kernel_tensor);
 }
