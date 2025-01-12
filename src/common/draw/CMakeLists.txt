@@ -5,6 +5,14 @@ find_package(SDL3 PATHS "${CMAKE_BINARY_DIR}/ext/sdl3")
 find_package(Eigen3 3.3 NO_MODULE PATHS "${CMAKE_BINARY_DIR}/ext/eigen")
 find_package(OpenGL)
 
+add_library(goopax_typedefs INTERFACE)
+if (GOOPAX_DEBUG)
+  target_compile_definitions(goopax_typedefs INTERFACE -DGOOPAX_DEBUG=1)
+else()
+  target_compile_definitions(goopax_typedefs INTERFACE -DGOOPAX_DEBUG=0)
+endif()
+
+
 if (TARGET SDL3::SDL3 AND TARGET Eigen3::Eigen)
 
 if (TARGET OpenGL::GL)
@@ -53,7 +61,6 @@ else()
     target_compile_definitions(goopax_draw PUBLIC -DWITH_METAL=0)
 endif()
 
-#target_include_directories(goopax_draw SYSTEM PRIVATE "ext/glatter/include")
 target_link_libraries(goopax_draw PUBLIC SDL3::SDL3)
 if (NOT APPLE)
   if (NOT WIN32)
@@ -61,12 +68,6 @@ if (NOT APPLE)
   endif()
   target_link_libraries(goopax_draw PUBLIC OpenGL::GLU)
 endif()
-target_link_libraries(goopax_draw PUBLIC goopax::goopax Eigen3::Eigen)
-
-if (GOOPAX_DEBUG)
-  target_compile_definitions(goopax_draw PUBLIC -DGOOPAX_DEBUG=1)
-else()
-  target_compile_definitions(goopax_draw PUBLIC -DGOOPAX_DEBUG=0)
-endif()
+target_link_libraries(goopax_draw PUBLIC goopax::goopax Eigen3::Eigen goopax_typedefs)
 
 endif()
