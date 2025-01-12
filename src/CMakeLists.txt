@@ -2,7 +2,11 @@ cmake_minimum_required(VERSION 3.15)
 
 project(goopax_examples LANGUAGES CXX)
 
-set (CMAKE_CXX_STANDARD 20)
+if (CMAKE_VERSION VERSION_LESS "3.20")
+  set (CMAKE_CXX_STANDARD 20)
+else()
+  set (CMAKE_CXX_STANDARD 23)
+endif()
 
 # Disabling cuda examples by default because of compatibility issues between cuda and gcc>=13
 option(WITH_CUDA "WITH_CUDA" OFF)

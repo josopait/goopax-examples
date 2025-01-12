@@ -35,7 +35,7 @@ struct matmul
     kernel<void(buffer<ab_float_type>& a)> fill_random;
     VectorX<double> test_vector;
 
-    kernel<void()> kernel_naive;
+    kernel<void()> kernel_simple;
 #if !GOOPAX_DEBUG
     kernel<void()> kernel_tensor;
 #endif
@@ -72,7 +72,7 @@ struct matmul
             }
         }
 
-        kernel_naive.assign(device, [this]() {
+        kernel_simple.assign(device, [this]() {
             const_resource A(this->A);
             const_resource B(this->B);
             resource C(this->C);
@@ -109,12 +109,10 @@ struct matmul
                 assert(Nl % (bl) == 0);
                 assert(Nm % (bm * cm) == 0);
 
-                wmma::matrix<wmma::matrix_a, bk, bm, bl, ab_float_type> ma;
-                wmma::matrix<wmma::matrix_b, bk, bm, bl, ab_float_type> mb;
-                Matrix<wmma::matrix<wmma::accumulator, bk, bm, bl, c_float_type>, ck, cm> mc;
                 gpu_for_group(0, (Nk / bk / ck) * (Nm / bm / cm), [&](gpu_uint block) {
                     gpu_uint koff = block / (Nm / bm / cm) * bk * ck;
                     gpu_uint moff = block % (Nm / bm / cm) * bm * cm;
+                    Matrix<wmma::matrix<c_float_type, bk, bm>, ck, cm> mc;
 
                     for (unsigned int sk = 0; sk < ck; ++sk)
                     {
@@ -129,8 +127,10 @@ struct matmul
                         {
                             for (unsigned int sm = 0; sm < cm; ++sm)
                             {
-                                ma.load(A.begin() + (koff + sk * bk) * Nl + loff, Nl);
-                                mb.load(B.begin() + loff * Nm + (moff + sm * bm), Nm);
+                                wmma::matrix<ab_float_type, bk, bl> ma(
+                                    A.begin() + (koff + sk * bk) * Nl + loff, Nl, wmma::row_major);
+                                wmma::matrix<ab_float_type, bl, bm> mb(
+                                    B.begin() + loff * Nm + (moff + sm * bm), Nm, wmma::row_major);
                                 mc(sk, sm) = multiply_add(ma, mb, mc(sk, sm));
                             }
                         }
@@ -187,12 +187,12 @@ void run_with_types(goopax_device device)
 {
     matmul<ab_float_type, c_float_type> mat(device, NK(), NL(), NM());
 
-    cout << "\ntrying naive kernel";
-    mat.run(mat.kernel_naive);
+    cout << "\nsimple kernel";
+    mat.run(mat.kernel_simple);
 #if !GOOPAX_DEBUG
     if (mat.kernel_tensor.get_impl() != nullptr)
     {
-        cout << "\ntrying tensor kernel";
+        cout << "\ntensor kernel";
         mat.run(mat.kernel_tensor);
     }
 #endif
@@ -202,7 +202,7 @@ int main(int argc, char** argv)
 {
     init_params(argc, argv);
 
-    for (auto device : devices(GOOPAX_DEBUG ? env_CPU : env_ALL))
+    for (auto device : devices(GOOPAX_DEBUG ? env_CPU : env_GPU))
     {
         if (device.support_type(Tdouble()))
         {
