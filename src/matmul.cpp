@@ -1,13 +1,12 @@
-#include <goopax_extra/random.hpp>
-#include <random>
-
 #include "common/draw/types.h"
-#include <goopax_extra/param.hpp>
-using namespace Eigen;
-
 #include <cassert>
 #include <chrono>
 #include <goopax>
+#include <goopax_extra/param.hpp>
+#include <goopax_extra/random.hpp>
+#include <random>
+
+using namespace Eigen;
 using namespace std::chrono;
 using namespace goopax;
 using namespace std;
@@ -36,9 +35,7 @@ struct matmul
     VectorX<double> test_vector;
 
     kernel<void()> kernel_simple;
-#if !GOOPAX_DEBUG
     kernel<void()> kernel_tensor;
-#endif
 
     matmul(goopax_device device0, unsigned int Nk0, unsigned int Nl0, unsigned int Nm0)
         : device(device0)
@@ -88,7 +85,6 @@ struct matmul
             });
         });
 
-#if !GOOPAX_DEBUG
         // sub-matrix sizes used in tensor cores
         static constexpr uint bk = sizeof(ab_float_type) == 8 ? 8 : 16;
         static constexpr uint bl = sizeof(ab_float_type) == 8 ? 4 : 16;
@@ -145,7 +141,6 @@ struct matmul
                 });
             });
         }
-#endif
     }
 
     void run(kernel<void()>& kernel_use)
@@ -189,13 +184,11 @@ void run_with_types(goopax_device device)
 
     cout << "\nsimple kernel";
     mat.run(mat.kernel_simple);
-#if !GOOPAX_DEBUG
     if (mat.kernel_tensor.get_impl() != nullptr)
     {
         cout << "\ntensor kernel";
         mat.run(mat.kernel_tensor);
     }
-#endif
 }
 
 int main(int argc, char** argv)
