@@ -150,10 +150,10 @@ struct matmul
 
     void run(kernel<void()>& kernel_use)
     {
-        cout << ". types: " << goopax::pretty_typename(typeid(ab_float_type)) << ", "
-             << goopax::pretty_typename(typeid(c_float_type))
-        << ", device=" << device.name() << ", env=" << device.get_envmode()
-        << endl;
+        cout << ". matrix<" << goopax::pretty_typename(typeid(ab_float_type)) << ", " << Nk << ", " << Nl << ">"
+             << " * matrix<" << goopax::pretty_typename(typeid(ab_float_type)) << ", " << Nl << ", " << Nm << ">"
+             << " -> matrix<" << goopax::pretty_typename(typeid(c_float_type)) << ", " << Nl << ", " << Nm << ">"
+             << ", device=" << device.name() << ", env=" << device.get_envmode() << endl;
         C.fill(numeric_limits<c_float_type>::quiet_NaN()).wait();
 
         auto time_start = steady_clock::now();
