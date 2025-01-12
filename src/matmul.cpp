@@ -150,8 +150,10 @@ struct matmul
 
     void run(kernel<void()>& kernel_use)
     {
-        cout << "types: " << goopax::pretty_typename(typeid(ab_float_type)) << ", "
-             << goopax::pretty_typename(typeid(c_float_type)) << endl;
+        cout << ". types: " << goopax::pretty_typename(typeid(ab_float_type)) << ", "
+             << goopax::pretty_typename(typeid(c_float_type))
+        << ", device=" << device.name() << ", env=" << device.get_envmode()
+        << endl;
         C.fill(numeric_limits<c_float_type>::quiet_NaN()).wait();
 
         auto time_start = steady_clock::now();
@@ -185,12 +187,12 @@ void run_with_types(goopax_device device)
 {
     matmul<ab_float_type, c_float_type> mat(device, NK(), NL(), NM());
 
-    cout << "\ntrying naive kernel." << endl;
+    cout << "\ntrying naive kernel";
     mat.run(mat.kernel_naive);
 #if !GOOPAX_DEBUG
     if (mat.kernel_tensor.get_impl() != nullptr)
     {
-        cout << "\ntrying tensor kernel." << endl;
+        cout << "\ntrying tensor kernel";
         mat.run(mat.kernel_tensor);
     }
 #endif
@@ -200,23 +202,23 @@ int main(int argc, char** argv)
 {
     init_params(argc, argv);
 
-#if GOOPAX_DEBUG
-    goopax_device device = default_device(env_CPU);
-#else
-    goopax_device device = default_device(env_ALL);
-#endif
-
-    run_with_types<Tdouble, Tdouble>(device);
-    run_with_types<Tfloat, Tfloat>(device);
-    if (device.support_type(Thalf()))
+    for (auto device : devices(GOOPAX_DEBUG ? env_CPU : env_ALL))
     {
-        run_with_types<Thalf, Thalf>(device);
-        run_with_types<Thalf, Tfloat>(device);
-    }
+        if (device.support_type(Tdouble()))
+        {
+            run_with_types<Tdouble, Tdouble>(device);
+        }
+        run_with_types<Tfloat, Tfloat>(device);
+        if (device.support_type(Thalf()))
+        {
+            run_with_types<Thalf, Thalf>(device);
+            run_with_types<Thalf, Tfloat>(device);
+        }
 #ifdef __STDCPP_BFLOAT16_T__
-    if (device.support_type(std::bfloat16_t()))
-    {
-        run_with_types<std::bfloat16_t, Tfloat>(device);
-    }
+        if (device.support_type(std::bfloat16_t()))
+        {
+            run_with_types<std::bfloat16_t, Tfloat>(device);
+        }
 #endif
+    }
 }
