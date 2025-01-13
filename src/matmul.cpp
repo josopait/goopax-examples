@@ -20,11 +20,12 @@ struct matmul
 {
     using gpu_ab_float_type = typename make_gpu<ab_float_type>::type;
     using gpu_c_float_type = typename make_gpu<c_float_type>::type;
+    goopax_device device;
+
     const unsigned int Nk;
     const unsigned int Nl;
     const unsigned int Nm;
 
-    goopax_device device;
     buffer<ab_float_type> A;
     buffer<ab_float_type> B;
     buffer<c_float_type> C;
@@ -143,22 +144,24 @@ struct matmul
         }
     }
 
-    void run(kernel<void()>& kernel_use)
+    void run(const string& name, kernel<void()>& kernel_use)
     {
-        cout << ". matrix<" << goopax::pretty_typename(typeid(ab_float_type)) << ", " << Nk << ", " << Nl << ">"
-             << " * matrix<" << goopax::pretty_typename(typeid(ab_float_type)) << ", " << Nl << ", " << Nm << ">"
-             << " -> matrix<" << goopax::pretty_typename(typeid(c_float_type)) << ", " << Nl << ", " << Nm << ">"
-             << ", device=" << device.name() << ", env=" << device.get_envmode() << endl;
+        cout << "\n"
+             << name << ". T_AB=" << goopax::pretty_typename(typeid(ab_float_type))
+             << ", T_C=" << goopax::pretty_typename(typeid(c_float_type)) << endl;
         C.fill(numeric_limits<c_float_type>::quiet_NaN()).wait();
 
-        auto time_start = steady_clock::now();
-        kernel_use().wait();
-        auto time_end = steady_clock::now();
+        for (uint count = 0; count < 3; ++count)
+        {
+            auto time_start = steady_clock::now();
+            kernel_use().wait();
+            auto time_end = steady_clock::now();
 
-        Tdouble time = duration_cast<duration<double>>(time_end - time_start).count();
-        auto FLOPS = Tdouble(NK()) * NL() * NM() * 2 / time;
-        cout << "Did matrix multiplication in " << time << " seconds. Performance: " << FLOPS / 1E12 << " TFLOPS"
-             << endl;
+            Tdouble time = duration_cast<duration<double>>(time_end - time_start).count();
+            auto FLOPS = Tdouble(NK()) * NL() * NM() * 2 / time;
+            cout << "Did matrix multiplication in " << time << " seconds. Performance: " << FLOPS / 1E12 << " TFLOPS"
+                 << endl;
+        }
 
         {
             buffer_map A(this->A);
@@ -182,12 +185,10 @@ void run_with_types(goopax_device device)
 {
     matmul<ab_float_type, c_float_type> mat(device, NK(), NL(), NM());
 
-    cout << "\nsimple kernel";
-    mat.run(mat.kernel_simple);
+    mat.run("kernel_simple", mat.kernel_simple);
     if (mat.kernel_tensor.get_impl() != nullptr)
     {
-        cout << "\ntensor kernel";
-        mat.run(mat.kernel_tensor);
+        mat.run("kernel_tensor", mat.kernel_tensor);
     }
 }
 
@@ -197,6 +198,9 @@ int main(int argc, char** argv)
 
     for (auto device : devices(GOOPAX_DEBUG ? env_CPU : env_GPU))
     {
+        cout << "testing device=" << device.name() << ", env=" << device.get_envmode() << endl;
+        cout << "matrix sizes: matrix<T_AB, " << NK() << ", " << NL() << "> * matrix<T_AB, " << NL() << "," << NM()
+             << "> + matrix<T_C, " << NK() << "," << NM() << ">" << endl;
         if (device.support_type(Tdouble()))
         {
             run_with_types<Tdouble, Tdouble>(device);
@@ -213,5 +217,6 @@ int main(int argc, char** argv)
             run_with_types<std::bfloat16_t, Tfloat>(device);
         }
 #endif
+        cout << endl << endl;
     }
 }
