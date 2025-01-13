@@ -59,9 +59,6 @@ struct matmul
     buffer<ab_float_type> B;
     buffer<c_float_type> C;
 
-    std::random_device rd;
-    WELL512_data rnd;
-    kernel<void(buffer<ab_float_type>& a)> fill_random;
     VectorX<double> test_vector;
 
     kernel<void()> kernel_simple;
@@ -72,13 +69,14 @@ struct matmul
         , Nk(Nk0)
         , Nl(Nl0)
         , Nm(Nm0)
-        , rnd(device, device.default_global_size_max(), rd())
     {
         A.assign(device, Nk * Nl);
         B.assign(device, Nl * Nm);
         C.assign(device, Nk * Nm);
 
-        fill_random.assign(device, [this](resource<ab_float_type>& a) {
+        std::random_device rd;
+        WELL512_data rnd(device, device.default_global_size_max(), rd());
+        kernel fill_random(device, [this, &rnd](resource<ab_float_type>& a) {
             WELL512_lib rndlib(rnd);
 
             for_each_global(a.begin(), a.end(), [&](gpu_ab_float_type& v) {
@@ -157,7 +155,7 @@ struct matmul
                                                                        COL_MAJOR_A() ? Nk : Nl,
                                                                        COL_MAJOR_A() ? wmma::col_major
                                                                                      : wmma::row_major);
-                                wmma::matrix<ab_float_type, bl, bm> mb(B.begin() + get_index_b(loff, (moff + sm * bm)),
+                                wmma::matrix<ab_float_type, bl, bm> mb(B.begin() + get_index_b(loff, moff + sm * bm),
                                                                        COL_MAJOR_B() ? Nl : Nm,
                                                                        COL_MAJOR_B() ? wmma::col_major
                                                                                      : wmma::row_major);
