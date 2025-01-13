@@ -11,8 +11,9 @@ using namespace std::chrono;
 using namespace goopax;
 using namespace std;
 
-PARAMOPT<size_t> NK("nk", 2048); // Matrix sizes. Can be specified as command line arguments,
-PARAMOPT<size_t> NL("nl", 1536); // e.g., --nk=128 --nl=256 --nm=384
+// Matrix sizes. Can be specified as command line arguments. See matmul --help
+PARAMOPT<size_t> NK("nk", 2048);
+PARAMOPT<size_t> NL("nl", 1536);
 PARAMOPT<size_t> NM("nm", 3072);
 
 PARAMOPT<bool> COL_MAJOR_A("col_major_a", false);
