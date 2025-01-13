@@ -137,29 +137,21 @@ struct matmul
                 gpu_for_group(0, (Nk / bk / ck) * (Nm / bm / cm), [&](gpu_uint block) {
                     gpu_uint koff = block / (Nm / bm / cm) * bk * ck;
                     gpu_uint moff = block % (Nm / bm / cm) * bm * cm;
-                    Matrix<wmma::matrix<c_float_type, bk, bm>, ck, cm> mc;
 
-                    for (unsigned int sk = 0; sk < ck; ++sk)
-                    {
-                        for (unsigned int sm = 0; sm < cm; ++sm)
-                        {
-                            mc(sk, sm).fill(static_cast<c_float_type>(0));
-                        }
-                    }
+                    Matrix<warp_matrix<c_float_type, bk, bm>, ck, cm> mc;
+                    mc.fill(warp_matrix<c_float_type, bk, bm>::filled(static_cast<c_float_type>(0)));
 
                     gpu_for(0, Nl, bl, [&](gpu_uint loff) {
                         for (unsigned int sk = 0; sk < ck; ++sk)
                         {
                             for (unsigned int sm = 0; sm < cm; ++sm)
                             {
-                                wmma::matrix<ab_float_type, bk, bl> ma(A.begin() + get_index_a(koff + sk * bk, loff),
-                                                                       COL_MAJOR_A() ? Nk : Nl,
-                                                                       COL_MAJOR_A() ? wmma::col_major
-                                                                                     : wmma::row_major);
-                                wmma::matrix<ab_float_type, bl, bm> mb(B.begin() + get_index_b(loff, moff + sm * bm),
-                                                                       COL_MAJOR_B() ? Nl : Nm,
-                                                                       COL_MAJOR_B() ? wmma::col_major
-                                                                                     : wmma::row_major);
+                                warp_matrix<ab_float_type, bk, bl> ma(A.begin() + get_index_a(koff + sk * bk, loff),
+                                                                      COL_MAJOR_A() ? Nk : Nl,
+                                                                      COL_MAJOR_A() ? col_major : row_major);
+                                warp_matrix<ab_float_type, bl, bm> mb(B.begin() + get_index_b(loff, moff + sm * bm),
+                                                                      COL_MAJOR_B() ? Nl : Nm,
+                                                                      COL_MAJOR_B() ? col_major : row_major);
                                 mc(sk, sm) = multiply_add(ma, mb, mc(sk, sm));
                             }
                         }
@@ -170,7 +162,7 @@ struct matmul
                         {
                             mc(sk, sm).store(C.begin() + get_index_c(koff + sk * bk, moff + sm * bm),
                                              COL_MAJOR_C() ? Nk : Nm,
-                                             COL_MAJOR_C() ? wmma::col_major : wmma::row_major);
+                                             COL_MAJOR_C() ? col_major : row_major);
                         }
                     }
                 });
