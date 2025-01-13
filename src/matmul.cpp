@@ -12,8 +12,12 @@ using namespace goopax;
 using namespace std;
 
 PARAMOPT<size_t> NK("nk", 2048); // Matrix sizes. Can be specified as command line arguments,
-PARAMOPT<size_t> NL("nl", 2048); // e.g., --nk=128 --nl=256 --nm=384
-PARAMOPT<size_t> NM("nm", 2048);
+PARAMOPT<size_t> NL("nl", 1536); // e.g., --nk=128 --nl=256 --nm=384
+PARAMOPT<size_t> NM("nm", 3072);
+
+PARAMOPT<bool> COL_MAJOR_A("col_major_a", false);
+PARAMOPT<bool> COL_MAJOR_B("col_major_b", false);
+PARAMOPT<bool> COL_MAJOR_C("col_major_c", false);
 
 template<typename ab_float_type, typename c_float_type>
 struct matmul
@@ -25,6 +29,31 @@ struct matmul
     const unsigned int Nk;
     const unsigned int Nl;
     const unsigned int Nm;
+
+    template<typename I>
+    I get_index_a(I k, I l) const
+    {
+        if (COL_MAJOR_A())
+            return k + l * Nk;
+        else
+            return k * Nl + l;
+    }
+    template<typename I>
+    I get_index_b(I l, I m) const
+    {
+        if (COL_MAJOR_B())
+            return l + m * Nl;
+        else
+            return l * Nm + m;
+    }
+    template<typename I>
+    I get_index_c(I k, I m) const
+    {
+        if (COL_MAJOR_C())
+            return k + m * Nk;
+        else
+            return k * Nm + m;
+    }
 
     buffer<ab_float_type> A;
     buffer<ab_float_type> B;
@@ -79,9 +108,9 @@ struct matmul
                 gpu_for_local(0, Nm, [&](gpu_uint m) {
                     gpu_c_float_type sum = static_cast<c_float_type>(0);
                     gpu_for(0, Nl, [&](gpu_uint l) {
-                        sum += A[k * Nl + l] * static_cast<gpu_c_float_type>(B[l * Nm + m]);
+                        sum += A[get_index_a(k, l)] * static_cast<gpu_c_float_type>(B[get_index_b(l, m)]);
                     });
-                    C[k * Nm + m] = sum;
+                    C[get_index_c(k, m)] = sum;
                 });
             });
         });
@@ -124,10 +153,14 @@ struct matmul
                         {
                             for (unsigned int sm = 0; sm < cm; ++sm)
                             {
-                                wmma::matrix<ab_float_type, bk, bl> ma(
-                                    A.begin() + (koff + sk * bk) * Nl + loff, Nl, wmma::row_major);
-                                wmma::matrix<ab_float_type, bl, bm> mb(
-                                    B.begin() + loff * Nm + (moff + sm * bm), Nm, wmma::row_major);
+                                wmma::matrix<ab_float_type, bk, bl> ma(A.begin() + get_index_a(koff + sk * bk, loff),
+                                                                       COL_MAJOR_A() ? Nk : Nl,
+                                                                       COL_MAJOR_A() ? wmma::col_major
+                                                                                     : wmma::row_major);
+                                wmma::matrix<ab_float_type, bl, bm> mb(B.begin() + get_index_b(loff, (moff + sm * bm)),
+                                                                       COL_MAJOR_B() ? Nl : Nm,
+                                                                       COL_MAJOR_B() ? wmma::col_major
+                                                                                     : wmma::row_major);
                                 mc(sk, sm) = multiply_add(ma, mb, mc(sk, sm));
                             }
                         }
@@ -136,7 +169,9 @@ struct matmul
                     {
                         for (unsigned int sm = 0; sm < cm; ++sm)
                         {
-                            mc(sk, sm).store(C.begin() + (koff + sk * bk) * Nm + (moff + sm * bm), Nm, wmma::row_major);
+                            mc(sk, sm).store(C.begin() + get_index_c(koff + sk * bk, moff + sm * bm),
+                                             COL_MAJOR_C() ? Nk : Nm,
+                                             COL_MAJOR_C() ? wmma::col_major : wmma::row_major);
                         }
                     }
                 });
@@ -163,20 +198,44 @@ struct matmul
                  << endl;
         }
 
+        MatrixX<ab_float_type> TA;
+        MatrixX<ab_float_type> TB;
+        MatrixX<c_float_type> TC;
         {
             buffer_map A(this->A);
             buffer_map B(this->B);
             buffer_map C(this->C);
 
-            Map<Matrix<ab_float_type, Dynamic, Dynamic, RowMajor>> TA(A.data(), Nk, Nl);
-            Map<Matrix<ab_float_type, Dynamic, Dynamic, RowMajor>> TB(B.data(), Nl, Nm);
-            Map<Matrix<c_float_type, Dynamic, Dynamic, RowMajor>> TC(C.data(), Nk, Nm);
-
-            VectorX<double> rwant = TA.template cast<double>() * (TB.template cast<double>() * test_vector);
-            VectorX<double> rhave = TC.template cast<double>() * test_vector;
-
-            cout << "err=" << (rhave - rwant).norm() / rwant.norm() << endl;
+            if (COL_MAJOR_A())
+            {
+                TA = Map<Matrix<ab_float_type, Dynamic, Dynamic, ColMajor>>(A.data(), Nk, Nl);
+            }
+            else
+            {
+                TA = Map<Matrix<ab_float_type, Dynamic, Dynamic, RowMajor>>(A.data(), Nk, Nl);
+            }
+            if (COL_MAJOR_B())
+            {
+                TB = Map<Matrix<ab_float_type, Dynamic, Dynamic, ColMajor>>(B.data(), Nl, Nm);
+            }
+            else
+            {
+                TB = Map<Matrix<ab_float_type, Dynamic, Dynamic, RowMajor>>(B.data(), Nl, Nm);
+            }
+            if (COL_MAJOR_C())
+            {
+                TC = Map<Matrix<c_float_type, Dynamic, Dynamic, ColMajor>>(C.data(), Nk, Nm);
+            }
+            else
+            {
+                TC = Map<Matrix<c_float_type, Dynamic, Dynamic, RowMajor>>(C.data(), Nk, Nm);
+            }
         }
+
+        VectorX<double> rwant = TA.template cast<double>() * (TB.template cast<double>() * test_vector);
+        VectorX<double> rhave = TC.template cast<double>() * test_vector;
+
+        cout << "err=" << (rhave - rwant).norm() / rwant.norm() << endl;
     }
 };
 
@@ -198,9 +257,9 @@ int main(int argc, char** argv)
 
     for (auto device : devices(GOOPAX_DEBUG ? env_CPU : env_GPU))
     {
-        cout << "testing device=" << device.name() << ", env=" << device.get_envmode() << endl;
-        cout << "matrix sizes: matrix<T_AB, " << NK() << ", " << NL() << "> * matrix<T_AB, " << NL() << "," << NM()
-             << "> + matrix<T_C, " << NK() << "," << NM() << ">" << endl;
+        cout << "running on device " << device.name() << ", env=" << device.get_envmode() << endl;
+        cout << "matrix sizes: matrix<T_AB, " << NK() << ", " << NL() << "> * matrix<T_AB, " << NL() << ", " << NM()
+             << "> + matrix<T_C, " << NK() << ", " << NM() << ">" << endl;
         if (device.support_type(Tdouble()))
         {
             run_with_types<Tdouble, Tdouble>(device);
