@@ -114,14 +114,16 @@ struct matmul
             });
         });
 
-        // sub-matrix sizes used in tensor cores
-        static constexpr uint bk = sizeof(ab_float_type) == 8 ? 8 : 64;
-        static constexpr uint bl = sizeof(ab_float_type) == 8 ? 4 : 16;
-        static constexpr uint bm = sizeof(ab_float_type) == 8 ? 8 : 64;
+        // Choosing suitable matrix block sizes.
+        // Bigger values can improve performance, but only if there are
+        // enough registers available.
+        unsigned int bk = 64;
+        unsigned int bl = 16;
+        unsigned int bm = 64;
 
-        // if (device.support_warp_matrix<ab_float_type, c_float_type>(bk, bm, bl))
+        if (device.support_warp_matrix<ab_float_type, c_float_type>(bk, bm, bl))
         {
-            kernel_tensor.assign(device, [this]() {
+            kernel_tensor.assign(device, [this, bk, bl, bm]() {
                 const_resource A(this->A);
                 const_resource B(this->B);
                 resource C(this->C);
@@ -134,15 +136,19 @@ struct matmul
                     gpu_uint koff = block / (Nm / bm) * bk;
                     gpu_uint moff = block % (Nm / bm) * bm;
 
-                    auto mc = warp_matrix<c_float_type, bk, bm>::filled(static_cast<c_float_type>(0));
+                    warp_matrix<c_float_type> mc(bk, bm, static_cast<c_float_type>(0));
 
                     gpu_for(0, Nl, bl, [&](gpu_uint loff) {
-                        warp_matrix<ab_float_type, bk, bl> ma(A.begin() + get_index_a(koff, loff),
-                                                              COL_MAJOR_A() ? Nk : Nl,
-                                                              COL_MAJOR_A() ? col_major : row_major);
-                        warp_matrix<ab_float_type, bl, bm> mb(B.begin() + get_index_b(loff, moff),
-                                                              COL_MAJOR_B() ? Nl : Nm,
-                                                              COL_MAJOR_B() ? col_major : row_major);
+                        warp_matrix<ab_float_type> ma(bk,
+                                                      bl,
+                                                      A.begin() + get_index_a(koff, loff),
+                                                      COL_MAJOR_A() ? Nk : Nl,
+                                                      COL_MAJOR_A() ? col_major : row_major);
+                        warp_matrix<ab_float_type> mb(bl,
+                                                      bm,
+                                                      B.begin() + get_index_b(loff, moff),
+                                                      COL_MAJOR_B() ? Nl : Nm,
+                                                      COL_MAJOR_B() ? col_major : row_major);
                         mc = multiply_add(ma, mb, mc);
                     });
 
