@@ -115,7 +115,7 @@ struct matmul
         });
 
         // Choosing suitable matrix block sizes.
-        // Bigger values can improve performance, but only if there are
+        // Larger values can improve performance, but only if there are
         // enough registers available.
         unsigned int bk = 64;
         unsigned int bl = 16;
