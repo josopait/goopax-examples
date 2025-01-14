@@ -63,5 +63,5 @@ include(ExternalProject)
     CMAKE_ARGS "${MY_CMAKE_ARGS}"
     "-DBUILD_SHARED_LIBS=0"
     "--install-prefix ${CMAKE_CURRENT_BINARY_DIR}/eigen"
-    INSTALL_COMMAND ""
+    #INSTALL_COMMAND ""
   )
