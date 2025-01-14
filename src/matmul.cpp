@@ -115,56 +115,40 @@ struct matmul
         });
 
         // sub-matrix sizes used in tensor cores
-        static constexpr uint bk = sizeof(ab_float_type) == 8 ? 8 : 16;
+        static constexpr uint bk = sizeof(ab_float_type) == 8 ? 8 : 64;
         static constexpr uint bl = sizeof(ab_float_type) == 8 ? 4 : 16;
-        static constexpr uint bm = sizeof(ab_float_type) == 8 ? 8 : 16;
+        static constexpr uint bm = sizeof(ab_float_type) == 8 ? 8 : 64;
 
-        if (device.support_warp_matrix<ab_float_type, c_float_type>(bk, bm, bl))
+        // if (device.support_warp_matrix<ab_float_type, c_float_type>(bk, bm, bl))
         {
             kernel_tensor.assign(device, [this]() {
                 const_resource A(this->A);
                 const_resource B(this->B);
                 resource C(this->C);
 
-                // Further increasing block size to reduce memory access.
-                constexpr uint ck = 4;
-                constexpr uint cm = 4;
+                assert(Nk % bk == 0);
+                assert(Nl % bl == 0);
+                assert(Nm % bm == 0);
 
-                assert(Nk % (bk * ck) == 0);
-                assert(Nl % (bl) == 0);
-                assert(Nm % (bm * cm) == 0);
+                gpu_for_group(0, (Nk / bk) * (Nm / bm), [&](gpu_uint block) {
+                    gpu_uint koff = block / (Nm / bm) * bk;
+                    gpu_uint moff = block % (Nm / bm) * bm;
 
-                gpu_for_group(0, (Nk / bk / ck) * (Nm / bm / cm), [&](gpu_uint block) {
-                    gpu_uint koff = block / (Nm / bm / cm) * bk * ck;
-                    gpu_uint moff = block % (Nm / bm / cm) * bm * cm;
-
-                    Matrix<warp_matrix<c_float_type, bk, bm>, ck, cm> mc;
-                    mc.fill(warp_matrix<c_float_type, bk, bm>::filled(static_cast<c_float_type>(0)));
+                    auto mc = warp_matrix<c_float_type, bk, bm>::filled(static_cast<c_float_type>(0));
 
                     gpu_for(0, Nl, bl, [&](gpu_uint loff) {
-                        for (unsigned int sk = 0; sk < ck; ++sk)
-                        {
-                            for (unsigned int sm = 0; sm < cm; ++sm)
-                            {
-                                warp_matrix<ab_float_type, bk, bl> ma(A.begin() + get_index_a(koff + sk * bk, loff),
-                                                                      COL_MAJOR_A() ? Nk : Nl,
-                                                                      COL_MAJOR_A() ? col_major : row_major);
-                                warp_matrix<ab_float_type, bl, bm> mb(B.begin() + get_index_b(loff, moff + sm * bm),
-                                                                      COL_MAJOR_B() ? Nl : Nm,
-                                                                      COL_MAJOR_B() ? col_major : row_major);
-                                mc(sk, sm) = multiply_add(ma, mb, mc(sk, sm));
-                            }
-                        }
+                        warp_matrix<ab_float_type, bk, bl> ma(A.begin() + get_index_a(koff, loff),
+                                                              COL_MAJOR_A() ? Nk : Nl,
+                                                              COL_MAJOR_A() ? col_major : row_major);
+                        warp_matrix<ab_float_type, bl, bm> mb(B.begin() + get_index_b(loff, moff),
+                                                              COL_MAJOR_B() ? Nl : Nm,
+                                                              COL_MAJOR_B() ? col_major : row_major);
+                        mc = multiply_add(ma, mb, mc);
                     });
-                    for (unsigned int sk = 0; sk < ck; ++sk)
-                    {
-                        for (unsigned int sm = 0; sm < cm; ++sm)
-                        {
-                            mc(sk, sm).store(C.begin() + get_index_c(koff + sk * bk, moff + sm * bm),
-                                             COL_MAJOR_C() ? Nk : Nm,
-                                             COL_MAJOR_C() ? col_major : row_major);
-                        }
-                    }
+
+                    mc.store(C.begin() + get_index_c(koff, moff),
+                             COL_MAJOR_C() ? Nk : Nm,
+                             COL_MAJOR_C() ? col_major : row_major);
                 });
             });
         }
