@@ -103,3 +103,22 @@ if (NOT TARGET Eigen3::Eigen)
   )
   add_dependencies(build_external_libraries build_eigen)
 endif()
+
+if (NOT TARGET glatter)
+  #include(FetchContent)
+  ExternalProject_Add(
+  #FetchContent_Declare(
+    build_glatter
+    GIT_REPOSITORY https://github.com/imakris/glatter.git
+    GIT_TAG 886f9765c6553ecb0934b5ec187db7d57ab0cfbc
+    EXCLUDE_FROM_ALL 1
+    #OVERRIDE_FIND_PACKAGE
+    CONFIGURE_COMMAND ""
+    INSTALL_COMMAND ""
+    BUILD_COMMAND ""
+  )
+  #FetchContent_MakeAvailable(fetch_glatter)
+  #FetchContent_Populate(glatter)
+  #FetchContent_GetProperties(glatter SOURCE_DIR)
+  add_dependencies(build_external_libraries build_glatter)
+endif()

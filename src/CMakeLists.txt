@@ -46,13 +46,17 @@ endif()
 
 add_subdirectory(ext)
 
+if (TARGET build_glatter)
+  add_library(glatter INTERFACE)
+  ExternalProject_Get_Property(build_glatter SOURCE_DIR)
+  message("SOURCE_DIR=${SOURCE_DIR}")
+  target_include_directories(glatter INTERFACE ${SOURCE_DIR}/include)
+endif()
+
 add_subdirectory(common/draw)
 
 if (GOOPAX_DRAW_WITH_OPENGL OR GOOPAX_DRAW_WITH_METAL AND NOT GOOPAX_DEBUG)
-  add(nbody goopax_draw)
-  if (TARGET nbody)
-    target_include_directories(nbody SYSTEM PRIVATE "common/draw/ext/glatter/include")
-  endif()
+  add(nbody glatter goopax_draw)
   if (APPLE)
     SET_SOURCE_FILES_PROPERTIES( nbody.cpp PROPERTIES LANGUAGE OBJCXX )
   endif()
