@@ -44,7 +44,7 @@ if (NOT TARGET SDL3::SDL3)
   add_dependencies(build_external_libraries build_sdl3)
 endif()
 
-if (NOT TARGET opencv)
+if (NOT TARGET opencv AND NOT ANDROID)
   ExternalProject_Add(
     build_opencv
     #DEPENDS Eigen3::Eigen
@@ -74,7 +74,7 @@ if (NOT TARGET opencv)
   add_dependencies(build_external_libraries build_opencv)
 endif()
 
-if (NOT TARGET Boost::system)
+if (NOT TARGET Boost::system AND NOT ANDROID)
   ExternalProject_Add(
     build_boost
     GIT_REPOSITORY https://github.com/boostorg/boost.git
