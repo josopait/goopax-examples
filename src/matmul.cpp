@@ -107,7 +107,7 @@ struct matmul
                 gpu_for_local(0, Nm, [&](gpu_uint m) {
                     gpu_c_float_type sum = static_cast<c_float_type>(0);
                     gpu_for(0, Nl, [&](gpu_uint l) {
-                        sum += A[get_index_a(k, l)] * static_cast<gpu_c_float_type>(B[get_index_b(l, m)]);
+                        sum += A[get_index_a(k, l)] * B[get_index_b(l, m)];
                     });
                     C[get_index_c(k, m)] = sum;
                 });
