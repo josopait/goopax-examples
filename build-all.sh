@@ -4,7 +4,7 @@ set -e
 
 export CMAKE_BUILD_PARALLEL_LEVEL="$(getconf _NPROCESSORS_ONLN)"
 
-cmake "$@" $CMAKE_FLAGS -B build src
+cmake "$@" -B build src
 cmake --build build --target build_glatter
 cmake --build build --target build_eigen
 cmake --build build --target build_sdl3
