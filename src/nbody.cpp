@@ -1,5 +1,8 @@
 #include "common/draw/window_sdl.h"
 #include "common/particle.hpp"
+#ifdef __APPLE__
+#include <SDL3/SDL_main.h>
+#endif
 #include <chrono>
 #include <random>
 using std::chrono::steady_clock;

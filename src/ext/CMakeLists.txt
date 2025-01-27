@@ -76,7 +76,7 @@ if (NOT TARGET opencv AND NOT ANDROID)
   add_dependencies(build_external_libraries build_opencv)
 endif()
 
-if (NOT TARGET Boost::system AND NOT ANDROID)
+if (NOT TARGET Boost::system)
   ExternalProject_Add(
     build_boost
     GIT_REPOSITORY https://github.com/boostorg/boost.git
@@ -101,7 +101,7 @@ if (NOT TARGET Eigen3::Eigen)
     #INSTALL_DIR "${CMAKE_CURRENT_BINARY_DIR}/eigen"
     CMAKE_ARGS "${MY_CMAKE_ARGS}"
     "--install-prefix ${CMAKE_CURRENT_BINARY_DIR}/eigen"
-    INSTALL_COMMAND ""
+    #INSTALL_COMMAND ""
   )
   add_dependencies(build_external_libraries build_eigen)
 endif()
