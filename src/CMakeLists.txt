@@ -2,7 +2,11 @@ cmake_minimum_required(VERSION 3.15)
 
 project(goopax_examples LANGUAGES CXX)
 
-set (CMAKE_CXX_STANDARD 20)
+if (CMAKE_VERSION VERSION_LESS "3.20")
+  set (CMAKE_CXX_STANDARD 20)
+else()
+  set (CMAKE_CXX_STANDARD 23)
+endif()
 
 # Disabling cuda examples by default because of compatibility issues between cuda and gcc>=13
 option(WITH_CUDA "WITH_CUDA" OFF)
@@ -17,7 +21,7 @@ if (WITH_CUDA)
   list(APPEND MY_CMAKE_ARGS "-DCMAKE_CUDA_STANDARD:STRING=17")
 endif()
 if (WIN32)
-  list(APPEND MY_CMAKE_ARGS "-DCMAKE_CONFIGURATION_TYPES:STRING=Debug" "-DCMAKE_MSVC_RUNTIME_LIBRARY:STRING=MultiThreadedDebug" "-DCMAKE_BUILD_TYPE:STRING=Debug")
+  list(APPEND MY_CMAKE_ARGS "-DCMAKE_CONFIGURATION_TYPES:STRING=${CMAKE_CONFIGURATION_TYPES}" "-DCMAKE_MSVC_RUNTIME_LIBRARY:STRING=${CMAKE_MSVC_RUNTIME_LIBRARY}")
 elseif (APPLE)
   enable_language(OBJCXX)
   list(APPEND MY_CMAKE_ARGS "-DCMAKE_OBJCXX_STANDARD:STRING=20")
@@ -65,6 +69,7 @@ if (GOOPAX_DRAW_WITH_OPENGL OR GOOPAX_DRAW_WITH_METAL AND NOT GOOPAX_DEBUG)
   endif()
 endif()
 
+
 add(deep-zoom-mandelbrot Boost::system goopax_draw)
 add(gather)
 add(mandelbrot goopax_draw)
@@ -75,7 +80,7 @@ add(pi)
 add(simple)
 add(race-condition)
 add(helloworld)
-add(matmul Eigen3::Eigen)
+add(matmul Eigen3::Eigen goopax_typedefs)
 add(cl-interop-1 OpenCL::OpenCL)
 add(cl-interop-2 OpenCL::OpenCL)
 
