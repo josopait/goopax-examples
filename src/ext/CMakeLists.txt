@@ -28,7 +28,7 @@ elseif (IOS)
 endif()
 
 
-if (NOT TARGET SDL3::SDL3)
+if (NOT TARGET SDL3::SDL3 AND NOT ANDROID)
   ExternalProject_Add(
     build_sdl3
     GIT_REPOSITORY https://github.com/libsdl-org/SDL.git

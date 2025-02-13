@@ -1,7 +1,5 @@
 #include "common/draw/window_sdl.h"
-#ifdef __APPLE__
 #include <SDL3/SDL_main.h>
-#endif
 #include <goopax_extra/fft.hpp>
 #include <opencv2/opencv.hpp>
 
