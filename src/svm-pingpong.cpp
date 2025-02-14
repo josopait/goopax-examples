@@ -1,10 +1,12 @@
 // @@@ CONVERT_TYPES_IGNORE @@@
 
-#include <atomic>
+#include "common/output.hpp"
 #include <chrono>
 #include <goopax>
 #include <goopax_extra/param.hpp>
 #include <thread>
+
+#include <atomic>
 
 using namespace goopax;
 using namespace std::chrono;
@@ -128,7 +130,7 @@ void pingpong()
         wait_all_devices();
         auto dt = duration<double>(steady_clock::now() - t0);
         cout << "N=" << N << ", time=" << dt.count() << ", average pingpong time: " << dt.count() * 1E6 / N
-             << " microseconds" << endl;
+             << " microseconds" << ", data=" << vector(data.begin(), data.end()) << endl;
         if (dt > 1000ms)
             break;
     }
