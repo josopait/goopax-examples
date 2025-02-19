@@ -1,5 +1,10 @@
-#include "common/output.hpp"
+/**
+   \example simple.cpp
+   Simple example program. A kernel writes numbers to a buffer, which are then printed out.
+ */
+
 #include <goopax>
+#include <goopax_extra/output.hpp>
 
 using namespace goopax;
 using namespace std;

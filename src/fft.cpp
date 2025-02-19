@@ -1,3 +1,9 @@
+/**
+   \example fft.cpp
+   Fast fourier transform example program.
+   Applies fourier transforms to video or camera images to make them unsharp.
+ */
+
 #include "common/draw/window_sdl.h"
 #include <SDL3/SDL_main.h>
 #include <goopax_extra/fft.hpp>
@@ -198,6 +204,11 @@ int main(int argc, char** argv)
         window->draw_goopax([&](image_buffer<2, Vector<Tuint8_t, 4>, true>& image) {
             data->render(reinterpret_cast<Vector<uint8_t, 3>*>(frame.data), image);
         });
+
+        // Because there are no other synchronization points in this demo
+        // (we are not evaluating any results from the GPU), this wait is
+        // required to prevent endless submission of asynchronous kernel calls.
+        window->device.wait_all();
 
         while (auto e = window->get_event())
         {

@@ -1,7 +1,10 @@
+/**
+   \example mandelbrot.cpp
+   Mandelbrot example
+ */
+
 #include "common/draw/window_sdl.h"
-#ifdef __APPLE__
 #include <SDL3/SDL_main.h>
-#endif
 #include <chrono>
 #include <goopax_extra/struct_types.hpp>
 
@@ -214,6 +217,11 @@ int main(int, char**)
             render(image, static_cast<complex<float>>(center), scale);
             render_size = image.dimensions();
         });
+
+        // Because there are no other synchronization points in this demo
+        // (we are not evaluating any results from the GPU), this wait is
+        // required to prevent endless submission of asynchronous kernel calls.
+        window->device.wait_all();
 
         ++framecount;
         if (now - last_fps_time > std::chrono::seconds(1))

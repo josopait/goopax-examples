@@ -2,15 +2,15 @@ include(ExternalProject)
 
 set(MY_OPENCV_ARGS "")
 set(MY_BOOST_ARGS "")
-set(MY_SDL_GIT_TAG main)
+set(MY_SDL_GIT_TAG release-3.2.4)
 
 list(APPEND MY_CMAKE_ARGS -DBUILD_SHARED_LIBS=0)
 
 if (WIN32)
-  list(APPEND MY_OPENCV_ARGS -DOpenCV_STATIC=ON)
+  list(APPEND MY_OPENCV_ARGS "-DOpenCV_STATIC=ON")
   set(OpenCV_STATIC ON CACHE "BOOL" "")
 elseif (ANDROID)
-  list(APPEND MY_BOOST_ARGS -DBOOST_EXCLUDE_LIBRARIES=process)
+  list(APPEND MY_BOOST_ARGS "-DBOOST_EXCLUDE_LIBRARIES=process")
   list(APPEND MY_OPENCV_ARGS
     #-DCMAKE_BUILD_TYPE=DEBUG
     -DANDROID_HOME=$ENV{android_sdk}
@@ -45,7 +45,7 @@ endif()
     "-DSDL_SHARED=0"
     "-DSDL_STATIC=1"
     "-DSDL_ASSEMBLY=0"
-    "--install-prefix ${CMAKE_CURRENT_BINARY_DIR}/sdl3"
+    "-DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}/sdl3"
   )
 
   ExternalProject_Add(
@@ -72,7 +72,7 @@ endif()
     "-DWITH_OPENJPEG=0"
     "-DWITH_TIFF=0"
     "-DWITH_FFMPEG=0"
-    "--install-prefix ${CMAKE_CURRENT_BINARY_DIR}/opencv"
+    "-DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}/opencv"
   )
 
   ExternalProject_Add(
@@ -84,7 +84,7 @@ endif()
     INSTALL_DIR "${CMAKE_CURRENT_BINARY_DIR}/boost"
     LIST_SEPARATOR |   # Workaround to prevent MY_BOOST_ARGS from being treated as a list.
     CMAKE_ARGS ${MY_CMAKE_ARGS} "${MY_BOOST_ARGS}"
-    "--install-prefix ${CMAKE_CURRENT_BINARY_DIR}/boost"
+    "-DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}/boost"
   )
 
   ExternalProject_Add(
@@ -94,7 +94,7 @@ endif()
     EXCLUDE_FROM_ALL 1
     #INSTALL_DIR "${CMAKE_CURRENT_BINARY_DIR}/eigen"
     CMAKE_ARGS "${MY_CMAKE_ARGS}"
-    "--install-prefix ${CMAKE_CURRENT_BINARY_DIR}/eigen"
+    "-DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}/eigen"
     #INSTALL_COMMAND ""
   )
 

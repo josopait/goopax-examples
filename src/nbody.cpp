@@ -1,3 +1,8 @@
+/**
+   \example nbody.cpp
+   Simple N-body example program
+ */
+
 #include "common/draw/window_sdl.h"
 #include "common/particle.hpp"
 #include <SDL3/SDL_main.h>
@@ -150,6 +155,10 @@ int main(int argc, char** argv)
         render(window->window, x);
         SDL_GL_SwapWindow(window->window);
 #endif
+
+        // Because there are no other synchronization points in this demo
+        // (we are not evaluating any results from the GPU), this wait is
+        // required to prevent endless submission of asynchronous kernel calls.
         f.wait();
     }
     return 0;

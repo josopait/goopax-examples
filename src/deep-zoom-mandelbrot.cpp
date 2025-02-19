@@ -1,7 +1,10 @@
+/**
+   \example deep-zoom-mandelbrot.cpp
+   Mandelbrot example program with deep zoom capability.
+ */
+
 #include "common/draw/window_sdl.h"
-#ifdef __APPLE__
 #include <SDL3/SDL_main.h>
-#endif
 #include <boost/multiprecision/cpp_bin_float.hpp>
 #include <chrono>
 #include <goopax_extra/struct_types.hpp>
@@ -310,7 +313,7 @@ public:
     }
 };
 
-int main()
+int main(int, char**)
 {
     shared_ptr<sdl_window> window = sdl_window::create("deep zoom mandelbrot",
                                                        Eigen::Vector<Tuint, 2>{ 640, 480 },

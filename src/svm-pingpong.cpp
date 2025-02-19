@@ -1,12 +1,13 @@
-// @@@ CONVERT_TYPES_IGNORE @@@
+/**
+   \example svm-pingpong.cpp
+   Multiple devices exchange messages during the runtime of the kernel.
+ */
 
-#include "common/output.hpp"
+#include <atomic>
 #include <chrono>
 #include <goopax>
 #include <goopax_extra/param.hpp>
 #include <thread>
-
-#include <atomic>
 
 using namespace goopax;
 using namespace std::chrono;
@@ -55,7 +56,7 @@ void pingpong()
                     gpu_if(local_id() == 0)
                     {
                         //  Waiting for our turn.
-                        gpu_while(atomic_load(*ptr, memory_order_acquire, memory::scope::system) != expect)
+                        gpu_while(atomic_load(*ptr, memory_order_acquire, memory::system) != expect)
                         {
                         }
                     }
@@ -69,7 +70,7 @@ void pingpong()
                     gpu_if(local_id() == 0)
                     {
                         // Handling over to the next id.
-                        auto old = atomic_add(*ptr, ADD(), memory_order_release, memory::scope::system);
+                        auto old = atomic_add(*ptr, ADD(), memory_order_release, memory::system);
                         gpu_assert(old == expect);
                     }
                 });
@@ -130,7 +131,7 @@ void pingpong()
         wait_all_devices();
         auto dt = duration<double>(steady_clock::now() - t0);
         cout << "N=" << N << ", time=" << dt.count() << ", average pingpong time: " << dt.count() * 1E6 / N
-             << " microseconds" << ", data=" << vector(data.begin(), data.end()) << endl;
+             << " microseconds" << endl;
         if (dt > 1000ms)
             break;
     }

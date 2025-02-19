@@ -1,6 +1,11 @@
+/**
+   \example gather.cpp
+   Demonstrates the use of the gather mechanism to get return values from kernel calls.
+ */
+
 #include "common/draw/types.h"
-#include "common/output.hpp"
 #include <goopax>
+#include <goopax_extra/output.hpp>
 #include <goopax_extra/random.hpp>
 #include <goopax_extra/struct_types.hpp>
 #include <random>
