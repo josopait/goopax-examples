@@ -28,11 +28,7 @@ Use git bash to run the build script
 
 MacOS
 -----
-<<<<<<< HEAD
-To build the example programs for MacOS or iOS, install the following applications:
-=======
 To build the example programs for MacOS, install the following applications:
->>>>>>> staging
 - Xcode
 - cmake
 Open a terminal.
