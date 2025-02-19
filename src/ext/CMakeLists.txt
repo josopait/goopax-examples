@@ -49,7 +49,7 @@ endif()
     "-DSDL_SHARED=0"
     "-DSDL_STATIC=1"
     "-DSDL_ASSEMBLY=0"
-    "-DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}/sdl3"
+    "-DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}/sdl"
   )
 
   ExternalProject_Add(
