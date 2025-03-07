@@ -2,8 +2,17 @@ include(ExternalProject)
 
 set(MY_OPENCV_ARGS "")
 set(MY_BOOST_ARGS "")
-set(MY_SDL_GIT_TAG release-3.2.4)
-set(MY_SDL_ARGS "")
+if (ANDROID)
+  set(MY_SDL_GIT_TAG release-3.2.8)
+  set(MY_SDL_ARGS
+    "-DSDL_SHARED=1"
+    "-DSDL_STATIC=0")
+else ()
+  set(MY_SDL_GIT_TAG release-3.2.4)
+  set(MY_SDL_ARGS
+    "-DSDL_SHARED=0"
+    "-DSDL_STATIC=1")
+endif()
 
 list(APPEND MY_CMAKE_ARGS -DBUILD_SHARED_LIBS=0)
 
@@ -50,8 +59,6 @@ endif()
     #INSTALL_DIR "${CMAKE_CURRENT_BINARY_DIR}/sdl3"
     CMAKE_ARGS "${MY_CMAKE_ARGS}"
     "${MY_SDL_ARGS}"
-    "-DSDL_SHARED=0"
-    "-DSDL_STATIC=1"
     "-DSDL_ASSEMBLY=0"
     "-DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}/sdl3"
   )
