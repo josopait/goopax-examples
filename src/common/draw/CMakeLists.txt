@@ -29,6 +29,9 @@ if (TARGET SDL3::SDL3 AND TARGET Eigen3::Eigen)
 
   message("OpenGL: ${GOOPAX_DRAW_WITH_OPENGL}")
   message("Metal: ${GOOPAX_DRAW_WITH_METAL}")
+  if (GOOPAX_DRAW_WITH_OPENGL OR GOOPAX_DRAW_WITH_METAL AND GOOPAX_DEBUG)
+    message(FATAL_ERROR "GOOPAX_DEBUG is not supported with OpenGL or Metal enabled.")
+  endif()
 
   set (FILES window_sdl.cpp window_sdl.h window_plain.h window_plain.cpp)
   if (GOOPAX_DRAW_WITH_METAL)
