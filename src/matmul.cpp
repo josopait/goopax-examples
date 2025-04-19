@@ -4,7 +4,7 @@
    use of tensor core hardware acceleration
  */
 
-#include "common/draw/types.h"
+#include <draw/types.h>
 #include <cassert>
 #include <chrono>
 #include <goopax>

@@ -3,7 +3,7 @@
    Simple N-body example program
  */
 
-#include "common/draw/window_sdl.h"
+#include <draw/window_sdl.h>
 #include "common/particle.hpp"
 #include <SDL3/SDL_main.h>
 #include <chrono>

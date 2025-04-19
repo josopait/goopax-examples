@@ -4,7 +4,7 @@
    Applies fourier transforms to video or camera images to make them unsharp.
  */
 
-#include "common/draw/window_sdl.h"
+#include <draw/window_sdl.h>
 #include <SDL3/SDL_main.h>
 #include <goopax_extra/fft.hpp>
 #include <opencv2/opencv.hpp>
