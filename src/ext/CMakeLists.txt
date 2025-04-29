@@ -3,7 +3,17 @@ include(ExternalProject)
 
 set(MY_OPENCV_ARGS "")
 set(MY_BOOST_ARGS "")
-set(MY_SDL_GIT_TAG release-3.2.4)
+if (ANDROID)
+  set(MY_SDL_GIT_TAG release-3.2.8)
+  set(MY_SDL_ARGS
+    "-DSDL_SHARED=1"
+    "-DSDL_STATIC=0")
+else ()
+  set(MY_SDL_GIT_TAG release-3.2.4)
+  set(MY_SDL_ARGS
+    "-DSDL_SHARED=0"
+    "-DSDL_STATIC=1")
+endif()
 
 list(APPEND MY_CMAKE_ARGS -DBUILD_SHARED_LIBS=0)
 
@@ -12,6 +22,13 @@ if (WIN32)
   set(OpenCV_STATIC ON CACHE "BOOL" "")
 elseif (ANDROID)
   list(APPEND MY_BOOST_ARGS "-DBOOST_EXCLUDE_LIBRARIES=process")
+  list(APPEND MY_OPENCV_ARGS
+    -DANDROID_HOME=$ENV{android_sdk}
+    -DBUILD_JAVA=OFF
+    -DBUILD_ANDROID_EXAMPLES=OFF
+    -DBUILD_ANDROID_PROJECTS=OFF
+    -DANDROID_STL=c++_shared
+    )
 elseif (IOS)
   list(APPEND MY_CMAKE_ARGS
     -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME}
@@ -28,24 +45,20 @@ elseif (IOS)
 endif()
 
 
-if (NOT ANDROID)
   ExternalProject_Add(
     build_sdl3
     GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
     GIT_TAG ${MY_SDL_GIT_TAG}
     EXCLUDE_FROM_ALL 1
     CMAKE_ARGS "${MY_CMAKE_ARGS}"
-    "-DSDL_SHARED=0"
-    "-DSDL_STATIC=1"
+    "${MY_SDL_ARGS}"
     "-DSDL_ASSEMBLY=0"
     "-DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}/sdl3"
   )
-endif()
-if (NOT TARGET SDL3::SDL3 AND NOT ANDROID)
+if (NOT TARGET SDL3::SDL3)
   add_dependencies(build_external_libraries build_sdl3)
 endif()
 
-if (NOT ANDROID)
   ExternalProject_Add(
     build_opencv
     URL https://github.com/opencv/opencv/archive/refs/tags/4.10.0.zip
@@ -70,7 +83,6 @@ if (NOT ANDROID)
     "-DWITH_FFMPEG=0"
     "-DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}/opencv"
   )
-endif()
 if (NOT OpenCV_FOUND AND NOT ANDROID)
   add_dependencies(build_external_libraries build_opencv)
 endif()
