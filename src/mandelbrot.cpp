@@ -118,7 +118,7 @@ int main(int, char**)
                     too_many_fingers = true;
                 }
                 fingermotion_active = false;
-                finger_positions.insert({ e->tfinger.fingerID, { e->tfinger.x, e->tfinger.y } });
+                finger_positions.insert_or_assign(finger_positions.end(), e->tfinger.fingerID, Vector<float, 2>{ e->tfinger.x, e->tfinger.y });
                 last_finger_distance = 0;
             }
             else if (e->type == SDL_EVENT_FINGER_UP)
@@ -215,7 +215,7 @@ int main(int, char**)
 
         if (num_fingers == 2)
         {
-            float finger_distance = (finger_positions.begin()->second - next(finger_positions.begin())->second).norm();
+            float finger_distance = (finger_positions.begin()->second - prev(finger_positions.end())->second).norm();
             if (last_finger_distance != 0)
             {
                 float factor = finger_distance / last_finger_distance;
