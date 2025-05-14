@@ -4,12 +4,6 @@ option(GOOPAX_DEBUG "GOOPAX_DEBUG" OFF)
 find_package(SDL3 PATHS "${CMAKE_BINARY_DIR}/ext/sdl3")
 find_package(Eigen3 3.3 NO_MODULE PATHS "${CMAKE_BINARY_DIR}/ext/eigen")
 find_package(OpenGL)
-if (NOT Vulkan_INCLUDE_DIRS)
-  find_package(Vulkan)
-  if (NOT TARGET Vulkan::Headers)
-    find_path(Vulkan_INCLUDE_DIRS "vulkan/vulkan.h" PATHS "${CMAKE_BINARY_DIR}/ext/build_sdl3-prefix/src/build_sdl3/src/video/khronos")
-  endif()
-endif()
 
 add_library(goopax_typedefs INTERFACE)
 if (GOOPAX_DEBUG)
@@ -23,6 +17,8 @@ target_include_directories(goopax_typedefs SYSTEM INTERFACE "${CMAKE_CURRENT_SOU
 
 if (TARGET SDL3::SDL3 AND TARGET Eigen3::Eigen)
 
+find_path(Vulkan_INCLUDE_DIRS "vulkan/vulkan.h" HINTS "${CMAKE_BINARY_DIR}/ext/build_sdl3-prefix/src/build_sdl3/src/video/khronos")
+
 if (TARGET OpenGL::GL)
     option(GOOPAX_DRAW_WITH_OPENGL "with OpenGL support" 1)
 else()
@@ -31,14 +27,14 @@ endif()
 
 if (APPLE)
     option(GOOPAX_DRAW_WITH_METAL "with Metal support" 1)
-    option(GOOPAX_DRAW_WITH_VULKAN "with Vulkan support" 0)
 else()
     option(GOOPAX_DRAW_WITH_METAL "with Metal support" 0)
-    if (Vulkan_INCLUDE_DIRS)
-        option(GOOPAX_DRAW_WITH_VULKAN "with Vulkan support" 1)
-    else()
-        option(GOOPAX_DRAW_WITH_VULKAN "with Vulkan support" 0)
-    endif()
+endif()
+
+if (NOT Vulkan_INCLUDE_DIRS STREQUAL "Vulkan_INCLUDE_DIRS-NOTFOUND")
+    option(GOOPAX_DRAW_WITH_VULKAN "with Vulkan support" 1)
+else()
+    option(GOOPAX_DRAW_WITH_VULKAN "with Vulkan support" 0)
 endif()
 
 if  (GOOPAX_DEBUG)
