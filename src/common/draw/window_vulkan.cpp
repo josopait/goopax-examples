@@ -265,6 +265,8 @@ sdl_window_vulkan::sdl_window_vulkan(const char* name, Eigen::Vector<Tuint, 2> s
     cout << "Getting devices." << endl;
     vector<goopax_device> devices = get_devices_from_vulkan(nullptr, extensions, { "VK_KHR_swapchain" });
 
+    cout << "devices.size()=" << devices.size() << endl;
+
     if (devices.empty())
     {
         throw std::runtime_error("Failed to find vulkan devices");
@@ -302,26 +304,25 @@ sdl_window_vulkan::sdl_window_vulkan(const char* name, Eigen::Vector<Tuint, 2> s
 
     for (auto& device : devices)
     {
-        vkDevice = static_cast<VkDevice>(device.get_device_ptr());
-        vkQueue = static_cast<VkQueue>(device.get_device_queue());
         uint32_t queueFamilyIndex = get_vulkan_queue_family_index(device);
-
-        cout << "have device: " << device.name() << ", VkDevice: " << vkDevice << ", queue=" << vkQueue
-             << ", queueFamilyIndex=" << queueFamilyIndex << endl;
 
         VkBool32 supported;
 
         call_vulkan(vkGetPhysicalDeviceSurfaceSupportKHR(
             get_vulkan_physical_device(device), queueFamilyIndex, surface, &supported));
 
-        cout << "supported=" << supported << endl;
-        if (supported)
+        cout << "have device: " << device.name() << ". supported=" << supported;
+
+        if (supported && !this->device.valid())
         {
-            cout << "Using." << endl;
+            cout << ". Using.";
             this->device = device;
-            break;
+            vkDevice = static_cast<VkDevice>(device.get_device_ptr());
+            vkQueue = static_cast<VkQueue>(device.get_device_queue());
         }
+        cout << endl;
     }
+    cout << endl;
 
     if (!this->device.valid())
     {
