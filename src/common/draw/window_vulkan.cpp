@@ -243,10 +243,7 @@ void sdl_window_vulkan::destroy_swapchain()
     vkDestroySwapchainKHR(vkDevice, swapchain, nullptr);
 }
 
-sdl_window_vulkan::sdl_window_vulkan(const char* name,
-                                     Eigen::Vector<Tuint, 2> size,
-                                     uint32_t flags,
-                                     goopax::envmode env)
+sdl_window_vulkan::sdl_window_vulkan(const char* name, Eigen::Vector<Tuint, 2> size, uint32_t flags)
     : sdl_window(name, size, flags | SDL_WINDOW_VULKAN, nullptr)
 {
     vector<const char*> extensions;
