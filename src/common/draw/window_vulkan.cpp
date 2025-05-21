@@ -154,7 +154,10 @@ tryagain:
         }
         else if (err == VK_SUBOPTIMAL_KHR)
         {
-            cout << "vkQueuePresentKHR returned VK_SUBOPTIMAL_KHR" << endl;
+            cout << "vkQueuePresentKHR returned VK_SUBOPTIMAL_KHR" << endl
+                 << "Probably the window has been resized." << endl;
+            destroy_swapchain();
+            create_swapchain();
         }
         else
         {
