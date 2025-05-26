@@ -20,10 +20,11 @@ Windows
 To build the example programs on windows, install the following applications:
 - visual studio 2022
 - cmake
-- git (with git bash)
-Use git bash to run the build script
+- git
 
-    ./build-all.sh
+Then run
+
+    build-all.bat
 
 
 MacOS
