@@ -362,7 +362,7 @@ int main(int, char**)
 
     map<SDL_FingerID, Vector<float, 2>> finger_positions;
 
-    auto get_finger_cm = [&]() {
+    auto get_finger_cm = [&]() -> Vector<float, 2>{
         Vector<float, 2> ret = { 0, 0 };
         for (auto& f : finger_positions)
         {
@@ -464,10 +464,10 @@ int main(int, char**)
                 last_finger_distance = finger_distance;
             }
 
+            Vector<float, 2> finger_cm = get_finger_cm();
             if (!finger_change)
             {
                 // dragging with one or multiple fingers
-                Vector<float, 2> finger_cm = get_finger_cm();
 
                 const complex<REAL> shift =
                     calc_c(center,
@@ -484,8 +484,8 @@ int main(int, char**)
                 moveto -= shift;
                 center = clamp_range(center);
                 moveto = clamp_range(moveto);
-                last_finger_cm = finger_cm;
             }
+            last_finger_cm = finger_cm;
         }
 
         if (steady_clock::now() - last_manual_action > 95s)
